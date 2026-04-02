@@ -18,8 +18,11 @@ const BENCH_PATTERN = /\/\/\s*@bench([^\n]*)\n\s*((?:export\s+)?(?:async\s+)?fun
 function parseOptions(optStr: string): BenchTarget['options'] {
   const opts: BenchTarget['options'] = {}
 
+  const labelMatch = optStr.match(/label\s*=\s*"([^"]*)"/)
+  if (labelMatch) opts.label = labelMatch[1]
+
   const nameMatch = optStr.match(/name\s*=\s*"([^"]*)"/)
-  if (nameMatch) opts.label = nameMatch[1]
+  if (nameMatch && !opts.label) opts.label = nameMatch[1]
 
   const iterMatch = optStr.match(/iterations\s*=\s*(\d+)/)
   if (iterMatch) opts.iterations = parseInt(iterMatch[1])

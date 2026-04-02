@@ -12,19 +12,19 @@ export interface BaselineEntry {
 
 export type Baseline = Record<string, BaselineEntry>
 
-export function loadBaseline(cwd = process.cwd()): Baseline {
+export function loadBaseline(cwd = process.cwd()): Baseline | null {
   const filePath = path.join(cwd, BASELINE_FILE)
-  if (!existsSync(filePath)) return {}
+  if (!existsSync(filePath)) return null
   try {
     return JSON.parse(readFileSync(filePath, 'utf-8'))
   } catch {
-    return {}
+    return null
   }
 }
 
 export function saveBaseline(results: BenchResult[], cwd = process.cwd()): void {
   const filePath = path.join(cwd, BASELINE_FILE)
-  const existing = loadBaseline(cwd)
+  const existing = loadBaseline(cwd) ?? {}
 
   for (const r of results) {
     existing[r.name] = {

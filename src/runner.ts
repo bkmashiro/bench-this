@@ -85,8 +85,9 @@ function getFuncName(target: BenchTarget): string {
   while ((match = BENCH_PATTERN.exec(content)) !== null) {
     const optStr = match[1] || ''
     const funcName = match[3] || match[4]
+    const labelMatch = optStr.match(/label\s*=\s*"([^"]*)"/)
     const nameMatch = optStr.match(/name\s*=\s*"([^"]*)"/)
-    const label = nameMatch?.[1]
+    const label = labelMatch?.[1] ?? nameMatch?.[1]
 
     if (label === target.name || funcName === target.name) {
       return funcName!

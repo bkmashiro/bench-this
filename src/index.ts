@@ -25,7 +25,7 @@ program
 
     console.log(`Running ${targets.length} benchmark${targets.length !== 1 ? 's' : ''}...`)
     const results = await runAll(targets)
-    const baseline = loadBaseline()
+    const baseline = loadBaseline() ?? {}
     const threshold = parseFloat(opts.threshold)
     const comparisons = compare(results, baseline, threshold)
 
@@ -67,7 +67,7 @@ program
   .option('--json', 'JSON output')
   .action(async (opts) => {
     const baseline = loadBaseline()
-    if (Object.keys(baseline).length === 0) {
+    if (baseline === null || Object.keys(baseline).length === 0) {
       console.log('No baseline found. Run `bench-this save` first.')
       process.exit(0)
     }

@@ -33,6 +33,12 @@ function fmtMs(n: number): string {
   return n.toFixed(3) + 'ms'
 }
 
+function getStatus(pctChange: number, threshold: number): 'regression' | 'improvement' | 'stable' {
+  if (pctChange < -threshold) return 'regression'
+  if (pctChange > threshold) return 'improvement'
+  return 'stable'
+}
+
 export function printReport(comparisons: CompareResult[], json = false): void {
   if (json) {
     console.log(JSON.stringify(comparisons, null, 2))
@@ -58,22 +64,29 @@ export function printReport(comparisons: CompareResult[], json = false): void {
     if (baseline !== undefined && pctChange !== undefined) {
       const sign = pctChange >= 0 ? '+' : ''
       const pctStr = `${sign}${pctChange.toFixed(1)}%`
+      const status = getStatus(pctChange, 20)
 
-      if (isRegression) {
+      if (status === 'regression') {
         console.log(
           chalk.dim(`    vs baseline:`),
           chalk.dim(`${fmtOps(baseline.opsPerSec)} ops/s`),
-          chalk.red(`  ⚠️  ${pctStr} REGRESSION`)
+          chalk.red(`  ⚠️  ${pctStr} regression`)
+        )
+      } else if (status === 'improvement') {
+        console.log(
+          chalk.dim(`    vs baseline:`),
+          chalk.dim(`${fmtOps(baseline.opsPerSec)} ops/s`),
+          chalk.green(`  ✅  ${pctStr} improvement`)
         )
       } else {
         console.log(
           chalk.dim(`    vs baseline:`),
           chalk.dim(`${fmtOps(baseline.opsPerSec)} ops/s`),
-          chalk.green(`  ✅  ${pctStr} (within threshold)`)
+          chalk.green(`  ✅  ${pctStr} stable`)
         )
       }
     } else {
-      console.log(chalk.dim(`    (no baseline)  💡 Run \`bench-this save\` to set baseline`))
+      console.log(chalk.dim(`    first run  💡 Run \`bench-this save\` to set baseline`))
     }
 
     console.log()
