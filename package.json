@@ -1,6 +1,6 @@
 {
   "name": "bench-this",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Run @bench annotated functions and track performance regressions",
   "type": "module",
   "main": "dist/index.js",
