@@ -65,15 +65,32 @@ export async function findBenchTargets(searchPath: string): Promise<BenchTarget[
 
   let files: string[]
   if (stats?.isDirectory()) {
-    files = await glob('**/*.{ts,js}', {
-      cwd: searchPath,
-      absolute: true,
-      ignore: ['**/node_modules/**', '**/*.d.ts']
-    })
+    files = await resolveBenchFiles(['**/*.{ts,js}'], searchPath)
   } else {
-    files = [path.resolve(searchPath)]
+    files = stats?.isFile()
+      ? [path.resolve(searchPath)]
+      : await resolveBenchFiles([searchPath], process.cwd())
   }
 
+  return collectBenchTargets(files)
+}
+
+export async function findBenchTargetsByGlob(patterns: string | string[], cwd = process.cwd()): Promise<BenchTarget[]> {
+  const files = await resolveBenchFiles(Array.isArray(patterns) ? patterns : [patterns], cwd)
+  return collectBenchTargets(files)
+}
+
+async function resolveBenchFiles(patterns: string[], cwd: string): Promise<string[]> {
+  const files = await glob(patterns, {
+    cwd,
+    absolute: true,
+    ignore: ['**/node_modules/**', '**/*.d.ts']
+  })
+
+  return Array.from(new Set(files)).sort()
+}
+
+function collectBenchTargets(files: string[]): BenchTarget[] {
   const allTargets: BenchTarget[] = []
   for (const file of files) {
     try {

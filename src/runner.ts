@@ -1,6 +1,7 @@
 import { Bench } from 'tinybench'
 import { pathToFileURL } from 'url'
 import { readFileSync } from 'fs'
+import { extname } from 'path'
 import type { BenchTarget } from './extractor.js'
 
 export interface BenchResult {
@@ -12,13 +13,13 @@ export interface BenchResult {
 
 export async function runBenchmark(target: BenchTarget): Promise<BenchResult | null> {
   try {
-    const fileUrl = pathToFileURL(target.file).href
-    const mod = await import(fileUrl)
+    const mod = await loadBenchmarkModule(target.file)
 
     // Find the function - try the display name or scan for @bench targets
     // We need to match by original function name, not label
     const funcName = getFuncName(target)
-    const fn = mod[funcName] || mod.default?.[funcName]
+    const defaultExport = mod.default as Record<string, unknown> | undefined
+    const fn = mod[funcName] || defaultExport?.[funcName]
 
     if (!fn || typeof fn !== 'function') {
       console.error(`  Could not find function "${funcName}" in ${target.file}`)
@@ -72,6 +73,17 @@ export async function runBenchmark(target: BenchTarget): Promise<BenchResult | n
     console.error(`  Error running benchmark "${target.name}":`, err)
     return null
   }
+}
+
+async function loadBenchmarkModule(file: string): Promise<Record<string, unknown>> {
+  const fileUrl = pathToFileURL(file).href
+
+  if (['.ts', '.tsx', '.mts', '.cts'].includes(extname(file))) {
+    const { tsImport } = await import('tsx/esm/api')
+    return tsImport(fileUrl, import.meta.url) as Promise<Record<string, unknown>>
+  }
+
+  return import(fileUrl) as Promise<Record<string, unknown>>
 }
 
 function getFuncName(target: BenchTarget): string {

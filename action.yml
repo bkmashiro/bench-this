@@ -1,0 +1,15 @@
+name: bench-this
+description: Run @bench annotated functions and detect performance regressions
+inputs:
+  threshold:
+    description: Regression threshold % (default 20)
+    default: "20"
+  files:
+    description: Glob pattern for files to bench
+    default: "src/**/*.ts"
+  baseline-branch:
+    description: Branch to compare against
+    default: "main"
+runs:
+  using: node20
+  main: dist/action.js
