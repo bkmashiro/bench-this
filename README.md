@@ -75,6 +75,28 @@ Options:
 - `--json` — Output results as JSON
 - `--ci` — Exit with code 1 if any regressions are found
 
+#### `bench-this --watch [dir] [path]`
+
+Watch a directory and rerun benchmarks when files change.
+
+```bash
+bench-this --watch src/ src/
+bench-this --watch src/
+```
+
+Changes are debounced by 200ms and each rerun is timestamped.
+
+#### `bench-this --compare <branch> [path]`
+
+Compare current benchmark results against another git branch.
+
+```bash
+bench-this --compare main
+bench-this --compare release/next src/
+```
+
+This runs benchmarks on the current branch, stashes local changes if needed, checks out the target branch, reruns benchmarks, then restores your original branch and stash.
+
 #### `bench-this save [path]`
 
 Run benchmarks and save the results as the new baseline.
