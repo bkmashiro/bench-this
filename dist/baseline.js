@@ -2,7 +2,9 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import * as path from 'path';
 const BASELINE_FILE = '.bench-baseline.json';
 export function loadBaseline(cwd = process.cwd()) {
-    const filePath = path.join(cwd, BASELINE_FILE);
+    return loadBaselineFile(path.join(cwd, BASELINE_FILE));
+}
+export function loadBaselineFile(filePath) {
     if (!existsSync(filePath))
         return null;
     try {
@@ -20,6 +22,8 @@ export function saveBaseline(results, cwd = process.cwd()) {
             opsPerSec: r.opsPerSec,
             avgMs: r.avgMs,
             savedAt: new Date().toISOString().split('T')[0],
+            samples: r.samples,
+            stdDevOpsPerSec: r.stdDevOpsPerSec,
         };
     }
     writeFileSync(filePath, JSON.stringify(existing, null, 2));

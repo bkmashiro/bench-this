@@ -8,8 +8,8 @@ var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __esm = (fn3, res) => function __init() {
   return fn3 && (res = (0, fn3[__getOwnPropNames(fn3)[0]])(fn3 = 0)), res;
 };
-var __commonJS = (cb, mod2) => function __require() {
-  return mod2 || (0, cb[__getOwnPropNames(cb)[0]])((mod2 = { exports: {} }).exports, mod2), mod2.exports;
+var __commonJS = (cb, mod) => function __require() {
+  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
 var __export = (target2, all) => {
   for (var name in all)
@@ -23,13 +23,13 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod2, isNodeMode, target2) => (target2 = mod2 != null ? __create(__getProtoOf(mod2)) : {}, __copyProps(
+var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
   // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod2 || !mod2.__esModule ? __defProp(target2, "default", { value: mod2, enumerable: true }) : target2,
-  mod2
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target2, "default", { value: mod, enumerable: true }) : target2,
+  mod
 ));
 
 // node_modules/.pnpm/@actions+core@1.11.1/node_modules/@actions/core/lib/utils.js
@@ -86,13 +86,13 @@ var require_command = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -172,13 +172,13 @@ var require_file_command = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -4025,8 +4025,8 @@ var require_util2 = __commonJS({
     function createDeferredPromise() {
       let res;
       let rej;
-      const promise = new Promise((resolve, reject) => {
-        res = resolve;
+      const promise = new Promise((resolve2, reject) => {
+        res = resolve2;
         rej = reject;
       });
       return { promise, resolve: res, reject: rej };
@@ -5530,8 +5530,8 @@ Content-Type: ${value.type || "application/octet-stream"}\r
                 });
               }
             });
-            const busboyResolve = new Promise((resolve, reject) => {
-              busboy.on("finish", resolve);
+            const busboyResolve = new Promise((resolve2, reject) => {
+              busboy.on("finish", resolve2);
               busboy.on("error", (err) => reject(new TypeError(err)));
             });
             if (this.body !== null) for await (const chunk of consumeBody(this[kState].body)) busboy.write(chunk);
@@ -6065,9 +6065,9 @@ var require_dispatcher_base = __commonJS({
       }
       close(callback) {
         if (callback === void 0) {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve2, reject) => {
             this.close((err, data) => {
-              return err ? reject(err) : resolve(data);
+              return err ? reject(err) : resolve2(data);
             });
           });
         }
@@ -6105,12 +6105,12 @@ var require_dispatcher_base = __commonJS({
           err = null;
         }
         if (callback === void 0) {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve2, reject) => {
             this.destroy(err, (err2, data) => {
               return err2 ? (
                 /* istanbul ignore next: should never error */
                 reject(err2)
-              ) : resolve(data);
+              ) : resolve2(data);
             });
           });
         }
@@ -7170,16 +7170,16 @@ var require_client = __commonJS({
         return this[kNeedDrain] < 2;
       }
       async [kClose]() {
-        return new Promise((resolve) => {
+        return new Promise((resolve2) => {
           if (!this[kSize]) {
-            resolve(null);
+            resolve2(null);
           } else {
-            this[kClosedResolve] = resolve;
+            this[kClosedResolve] = resolve2;
           }
         });
       }
       async [kDestroy](err) {
-        return new Promise((resolve) => {
+        return new Promise((resolve2) => {
           const requests = this[kQueue].splice(this[kPendingIdx]);
           for (let i7 = 0; i7 < requests.length; i7++) {
             const request = requests[i7];
@@ -7190,7 +7190,7 @@ var require_client = __commonJS({
               this[kClosedResolve]();
               this[kClosedResolve] = null;
             }
-            resolve();
+            resolve2();
           };
           if (this[kHTTP2Session] != null) {
             util.destroy(this[kHTTP2Session], err);
@@ -7254,13 +7254,13 @@ var require_client = __commonJS({
     var EMPTY_BUF = Buffer.alloc(0);
     async function lazyllhttp() {
       const llhttpWasmData = process.env.JEST_WORKER_ID ? require_llhttp_wasm() : void 0;
-      let mod2;
+      let mod;
       try {
-        mod2 = await WebAssembly.compile(Buffer.from(require_llhttp_simd_wasm(), "base64"));
+        mod = await WebAssembly.compile(Buffer.from(require_llhttp_simd_wasm(), "base64"));
       } catch (e5) {
-        mod2 = await WebAssembly.compile(Buffer.from(llhttpWasmData || require_llhttp_wasm(), "base64"));
+        mod = await WebAssembly.compile(Buffer.from(llhttpWasmData || require_llhttp_wasm(), "base64"));
       }
-      return await WebAssembly.instantiate(mod2, {
+      return await WebAssembly.instantiate(mod, {
         env: {
           /* eslint-disable camelcase */
           wasm_on_url: (p5, at3, len) => {
@@ -7770,7 +7770,7 @@ var require_client = __commonJS({
         });
       }
       try {
-        const socket = await new Promise((resolve, reject) => {
+        const socket = await new Promise((resolve2, reject) => {
           client[kConnector]({
             host,
             hostname,
@@ -7782,7 +7782,7 @@ var require_client = __commonJS({
             if (err) {
               reject(err);
             } else {
-              resolve(socket2);
+              resolve2(socket2);
             }
           });
         });
@@ -8406,12 +8406,12 @@ upgrade: ${upgrade}\r
           cb();
         }
       }
-      const waitForDrain = () => new Promise((resolve, reject) => {
+      const waitForDrain = () => new Promise((resolve2, reject) => {
         assert2(callback === null);
         if (socket[kError]) {
           reject(socket[kError]);
         } else {
-          callback = resolve;
+          callback = resolve2;
         }
       });
       if (client[kHTTPConnVersion] === "h2") {
@@ -8756,8 +8756,8 @@ var require_pool_base = __commonJS({
         if (this[kQueue].isEmpty()) {
           return Promise.all(this[kClients].map((c3) => c3.close()));
         } else {
-          return new Promise((resolve) => {
-            this[kClosedResolve] = resolve;
+          return new Promise((resolve2) => {
+            this[kClosedResolve] = resolve2;
           });
         }
       }
@@ -9335,7 +9335,7 @@ var require_readable = __commonJS({
         if (this.closed) {
           return Promise.resolve(null);
         }
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve2, reject) => {
           const signalListenerCleanup = signal ? util.addAbortListener(signal, () => {
             this.destroy();
           }) : noop;
@@ -9344,7 +9344,7 @@ var require_readable = __commonJS({
             if (signal && signal.aborted) {
               reject(signal.reason || Object.assign(new Error("The operation was aborted"), { name: "AbortError" }));
             } else {
-              resolve(null);
+              resolve2(null);
             }
           }).on("error", noop).on("data", function(chunk) {
             limit -= chunk.length;
@@ -9366,11 +9366,11 @@ var require_readable = __commonJS({
         throw new TypeError("unusable");
       }
       assert2(!stream[kConsume]);
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve2, reject) => {
         stream[kConsume] = {
           type,
           stream,
-          resolve,
+          resolve: resolve2,
           reject,
           length: 0,
           body: []
@@ -9405,12 +9405,12 @@ var require_readable = __commonJS({
       }
     }
     function consumeEnd(consume2) {
-      const { type, body, resolve, stream, length } = consume2;
+      const { type, body, resolve: resolve2, stream, length } = consume2;
       try {
         if (type === "text") {
-          resolve(toUSVString(Buffer.concat(body)));
+          resolve2(toUSVString(Buffer.concat(body)));
         } else if (type === "json") {
-          resolve(JSON.parse(Buffer.concat(body)));
+          resolve2(JSON.parse(Buffer.concat(body)));
         } else if (type === "arrayBuffer") {
           const dst = new Uint8Array(length);
           let pos = 0;
@@ -9418,12 +9418,12 @@ var require_readable = __commonJS({
             dst.set(buf, pos);
             pos += buf.byteLength;
           }
-          resolve(dst.buffer);
+          resolve2(dst.buffer);
         } else if (type === "blob") {
           if (!Blob2) {
             Blob2 = require("buffer").Blob;
           }
-          resolve(new Blob2(body, { type: stream[kContentType] }));
+          resolve2(new Blob2(body, { type: stream[kContentType] }));
         }
         consumeFinish(consume2);
       } catch (err) {
@@ -9678,9 +9678,9 @@ var require_api_request = __commonJS({
     };
     function request(opts, callback) {
       if (callback === void 0) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve2, reject) => {
           request.call(this, opts, (err, data) => {
-            return err ? reject(err) : resolve(data);
+            return err ? reject(err) : resolve2(data);
           });
         });
       }
@@ -9853,9 +9853,9 @@ var require_api_stream = __commonJS({
     };
     function stream(opts, factory, callback) {
       if (callback === void 0) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve2, reject) => {
           stream.call(this, opts, factory, (err, data) => {
-            return err ? reject(err) : resolve(data);
+            return err ? reject(err) : resolve2(data);
           });
         });
       }
@@ -10136,9 +10136,9 @@ var require_api_upgrade = __commonJS({
     };
     function upgrade(opts, callback) {
       if (callback === void 0) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve2, reject) => {
           upgrade.call(this, opts, (err, data) => {
-            return err ? reject(err) : resolve(data);
+            return err ? reject(err) : resolve2(data);
           });
         });
       }
@@ -10227,9 +10227,9 @@ var require_api_connect = __commonJS({
     };
     function connect(opts, callback) {
       if (callback === void 0) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve2, reject) => {
           connect.call(this, opts, (err, data) => {
-            return err ? reject(err) : resolve(data);
+            return err ? reject(err) : resolve2(data);
           });
         });
       }
@@ -13851,7 +13851,7 @@ var require_fetch = __commonJS({
       async function dispatch({ body }) {
         const url = requestCurrentURL(request);
         const agent = fetchParams.controller.dispatcher;
-        return new Promise((resolve, reject) => agent.dispatch(
+        return new Promise((resolve2, reject) => agent.dispatch(
           {
             path: url.pathname + url.search,
             origin: url.origin,
@@ -13927,7 +13927,7 @@ var require_fetch = __commonJS({
                   }
                 }
               }
-              resolve({
+              resolve2({
                 status,
                 statusText,
                 headersList: headers[kHeadersList],
@@ -13970,7 +13970,7 @@ var require_fetch = __commonJS({
                 const val = headersList[n9 + 1].toString("latin1");
                 headers[kHeadersList].append(key, val);
               }
-              resolve({
+              resolve2({
                 status,
                 statusText: STATUS_CODES[status],
                 headersList: headers[kHeadersList],
@@ -17313,22 +17313,22 @@ var require_lib = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -17344,7 +17344,7 @@ var require_lib = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -17430,26 +17430,26 @@ var require_lib = __commonJS({
       }
       readBody() {
         return __awaiter(this, void 0, void 0, function* () {
-          return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+          return new Promise((resolve2) => __awaiter(this, void 0, void 0, function* () {
             let output = Buffer.alloc(0);
             this.message.on("data", (chunk) => {
               output = Buffer.concat([output, chunk]);
             });
             this.message.on("end", () => {
-              resolve(output.toString());
+              resolve2(output.toString());
             });
           }));
         });
       }
       readBodyBuffer() {
         return __awaiter(this, void 0, void 0, function* () {
-          return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
+          return new Promise((resolve2) => __awaiter(this, void 0, void 0, function* () {
             const chunks = [];
             this.message.on("data", (chunk) => {
               chunks.push(chunk);
             });
             this.message.on("end", () => {
-              resolve(Buffer.concat(chunks));
+              resolve2(Buffer.concat(chunks));
             });
           }));
         });
@@ -17658,14 +17658,14 @@ var require_lib = __commonJS({
        */
       requestRaw(info2, data) {
         return __awaiter(this, void 0, void 0, function* () {
-          return new Promise((resolve, reject) => {
+          return new Promise((resolve2, reject) => {
             function callbackForResult(err, res) {
               if (err) {
                 reject(err);
               } else if (!res) {
                 reject(new Error("Unknown error"));
               } else {
-                resolve(res);
+                resolve2(res);
               }
             }
             this.requestRawWithCallback(info2, data, callbackForResult);
@@ -17847,12 +17847,12 @@ var require_lib = __commonJS({
         return __awaiter(this, void 0, void 0, function* () {
           retryNumber = Math.min(ExponentialBackoffCeiling, retryNumber);
           const ms2 = ExponentialBackoffTimeSlice * Math.pow(2, retryNumber);
-          return new Promise((resolve) => setTimeout(() => resolve(), ms2));
+          return new Promise((resolve2) => setTimeout(() => resolve2(), ms2));
         });
       }
       _processResponse(res, options) {
         return __awaiter(this, void 0, void 0, function* () {
-          return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+          return new Promise((resolve2, reject) => __awaiter(this, void 0, void 0, function* () {
             const statusCode = res.message.statusCode || 0;
             const response = {
               statusCode,
@@ -17860,7 +17860,7 @@ var require_lib = __commonJS({
               headers: {}
             };
             if (statusCode === HttpCodes.NotFound) {
-              resolve(response);
+              resolve2(response);
             }
             function dateTimeDeserializer(key, value) {
               if (typeof value === "string") {
@@ -17899,7 +17899,7 @@ var require_lib = __commonJS({
               err.result = response.result;
               reject(err);
             } else {
-              resolve(response);
+              resolve2(response);
             }
           }));
         });
@@ -17916,11 +17916,11 @@ var require_auth = __commonJS({
     "use strict";
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -17936,7 +17936,7 @@ var require_auth = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -18020,11 +18020,11 @@ var require_oidc_utils = __commonJS({
     "use strict";
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -18040,7 +18040,7 @@ var require_oidc_utils = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -18118,11 +18118,11 @@ var require_summary = __commonJS({
     "use strict";
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -18138,7 +18138,7 @@ var require_summary = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -18428,13 +18428,13 @@ var require_path_utils = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -18473,22 +18473,22 @@ var require_io_util = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -18504,7 +18504,7 @@ var require_io_util = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -18646,22 +18646,22 @@ var require_io = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -18677,7 +18677,7 @@ var require_io = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -18894,22 +18894,22 @@ var require_toolrunner = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -18925,7 +18925,7 @@ var require_toolrunner = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -19153,7 +19153,7 @@ var require_toolrunner = __commonJS({
             this.toolPath = path2.resolve(process.cwd(), this.options.cwd || process.cwd(), this.toolPath);
           }
           this.toolPath = yield io.which(this.toolPath, true);
-          return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+          return new Promise((resolve2, reject) => __awaiter(this, void 0, void 0, function* () {
             this._debug(`exec tool: ${this.toolPath}`);
             this._debug("arguments:");
             for (const arg of this.args) {
@@ -19236,7 +19236,7 @@ var require_toolrunner = __commonJS({
               if (error) {
                 reject(error);
               } else {
-                resolve(exitCode);
+                resolve2(exitCode);
               }
             });
             if (this.options.input) {
@@ -19378,22 +19378,22 @@ var require_exec = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -19409,7 +19409,7 @@ var require_exec = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -19489,22 +19489,22 @@ var require_platform = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -19520,13 +19520,13 @@ var require_platform = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
     };
-    var __importDefault = exports2 && exports2.__importDefault || function(mod2) {
-      return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
+    var __importDefault = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getDetails = exports2.isLinux = exports2.isMacOS = exports2.isWindows = exports2.arch = exports2.platform = void 0;
@@ -19608,22 +19608,22 @@ var require_core = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -19639,7 +19639,7 @@ var require_core = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -19896,22 +19896,22 @@ var require_utils3 = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     var __awaiter = exports2 && exports2.__awaiter || function(thisArg, _arguments, P4, generator) {
       function adopt(value) {
-        return value instanceof P4 ? value : new P4(function(resolve) {
-          resolve(value);
+        return value instanceof P4 ? value : new P4(function(resolve2) {
+          resolve2(value);
         });
       }
-      return new (P4 || (P4 = Promise))(function(resolve, reject) {
+      return new (P4 || (P4 = Promise))(function(resolve2, reject) {
         function fulfilled(value) {
           try {
             step(generator.next(value));
@@ -19927,7 +19927,7 @@ var require_utils3 = __commonJS({
           }
         }
         function step(result2) {
-          result2.done ? resolve(result2.value) : adopt(result2.value).then(fulfilled, rejected);
+          result2.done ? resolve2(result2.value) : adopt(result2.value).then(fulfilled, rejected);
         }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
       });
@@ -20151,7 +20151,7 @@ var require_dist_node2 = __commonJS({
       }
       return to;
     };
-    var __toCommonJS = (mod2) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod2);
+    var __toCommonJS = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
     var dist_src_exports = {};
     __export2(dist_src_exports, {
       endpoint: () => endpoint
@@ -20591,15 +20591,15 @@ var require_dist_node4 = __commonJS({
       }
       return to;
     };
-    var __toESM2 = (mod2, isNodeMode, target2) => (target2 = mod2 != null ? __create2(__getProtoOf2(mod2)) : {}, __copyProps2(
+    var __toESM2 = (mod, isNodeMode, target2) => (target2 = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
       // If the importer is in node compatibility mode or this is not an ESM
       // file that has been converted to a CommonJS file using a Babel-
       // compatible transform (i.e. "__esModule" has not been set), then set
       // "default" to the CommonJS "module.exports" for node compatibility.
-      isNodeMode || !mod2 || !mod2.__esModule ? __defProp2(target2, "default", { value: mod2, enumerable: true }) : target2,
-      mod2
+      isNodeMode || !mod || !mod.__esModule ? __defProp2(target2, "default", { value: mod, enumerable: true }) : target2,
+      mod
     ));
-    var __toCommonJS = (mod2) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod2);
+    var __toCommonJS = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
     var dist_src_exports = {};
     __export2(dist_src_exports, {
       RequestError: () => RequestError
@@ -20681,7 +20681,7 @@ var require_dist_node5 = __commonJS({
       }
       return to;
     };
-    var __toCommonJS = (mod2) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod2);
+    var __toCommonJS = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
     var dist_src_exports = {};
     __export2(dist_src_exports, {
       request: () => request
@@ -20891,7 +20891,7 @@ var require_dist_node6 = __commonJS({
       }
       return to;
     };
-    var __toCommonJS = (mod2) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod2);
+    var __toCommonJS = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
     var index_exports = {};
     __export2(index_exports, {
       GraphqlResponseError: () => GraphqlResponseError,
@@ -21028,7 +21028,7 @@ var require_dist_node7 = __commonJS({
       }
       return to;
     };
-    var __toCommonJS = (mod2) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod2);
+    var __toCommonJS = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
     var dist_src_exports = {};
     __export2(dist_src_exports, {
       createTokenAuth: () => createTokenAuth
@@ -21099,7 +21099,7 @@ var require_dist_node8 = __commonJS({
       }
       return to;
     };
-    var __toCommonJS = (mod2) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod2);
+    var __toCommonJS = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
     var index_exports = {};
     __export2(index_exports, {
       Octokit: () => Octokit
@@ -21265,7 +21265,7 @@ var require_dist_node9 = __commonJS({
       }
       return to;
     };
-    var __toCommonJS = (mod2) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod2);
+    var __toCommonJS = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
     var dist_src_exports = {};
     __export2(dist_src_exports, {
       legacyRestEndpointMethods: () => legacyRestEndpointMethods,
@@ -23421,7 +23421,7 @@ var require_dist_node10 = __commonJS({
       }
       return to;
     };
-    var __toCommonJS = (mod2) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod2);
+    var __toCommonJS = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
     var dist_src_exports = {};
     __export2(dist_src_exports, {
       composePaginateRest: () => composePaginateRest,
@@ -23802,13 +23802,13 @@ var require_utils4 = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -23862,13 +23862,13 @@ var require_github = __commonJS({
     }) : function(o7, v5) {
       o7["default"] = v5;
     });
-    var __importStar = exports2 && exports2.__importStar || function(mod2) {
-      if (mod2 && mod2.__esModule) return mod2;
+    var __importStar = exports2 && exports2.__importStar || function(mod) {
+      if (mod && mod.__esModule) return mod;
       var result2 = {};
-      if (mod2 != null) {
-        for (var k4 in mod2) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod2, k4)) __createBinding(result2, mod2, k4);
+      if (mod != null) {
+        for (var k4 in mod) if (k4 !== "default" && Object.prototype.hasOwnProperty.call(mod, k4)) __createBinding(result2, mod, k4);
       }
-      __setModuleDefault(result2, mod2);
+      __setModuleDefault(result2, mod);
       return result2;
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -27807,9 +27807,9 @@ var init_api = __esm({
 var core = __toESM(require_core(), 1);
 var github = __toESM(require_github(), 1);
 var import_fs6 = require("fs");
-var import_os2 = require("os");
+var import_os3 = require("os");
 var import_path3 = require("path");
-var import_child_process = require("child_process");
+var import_child_process2 = require("child_process");
 var import_util = require("util");
 
 // src/extractor.ts
@@ -30820,12 +30820,12 @@ function extractBenchTargets(filePath) {
   BENCH_PATTERN.lastIndex = 0;
   while ((match = BENCH_PATTERN.exec(content)) !== null) {
     const optStr = match[1] || "";
-    const funcName2 = match[3] || match[4];
-    if (!funcName2) continue;
+    const funcName = match[3] || match[4];
+    if (!funcName) continue;
     const lineNum = content.slice(0, match.index).split("\n").length;
     const opts = parseOptions(optStr);
     targets.push({
-      name: opts.label || funcName2,
+      name: opts.label || funcName,
       file: filePath,
       line: lineNum,
       options: opts
@@ -30861,7 +30861,9 @@ var import_fs3 = require("fs");
 var path = __toESM(require("path"), 1);
 var BASELINE_FILE = ".bench-baseline.json";
 function loadBaseline(cwd = process.cwd()) {
-  const filePath = path.join(cwd, BASELINE_FILE);
+  return loadBaselineFile(path.join(cwd, BASELINE_FILE));
+}
+function loadBaselineFile(filePath) {
   if (!(0, import_fs3.existsSync)(filePath)) return null;
   try {
     return JSON.parse((0, import_fs3.readFileSync)(filePath, "utf-8"));
@@ -30876,7 +30878,9 @@ function saveBaseline(results, cwd = process.cwd()) {
     existing[r3.name] = {
       opsPerSec: r3.opsPerSec,
       avgMs: r3.avgMs,
-      savedAt: (/* @__PURE__ */ new Date()).toISOString().split("T")[0]
+      savedAt: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+      samples: r3.samples,
+      stdDevOpsPerSec: r3.stdDevOpsPerSec
     };
   }
   (0, import_fs3.writeFileSync)(filePath, JSON.stringify(existing, null, 2));
@@ -31310,19 +31314,29 @@ var Bench = class extends EventTarget {
 };
 
 // src/runner.ts
-var import_url = require("url");
 var import_fs5 = require("fs");
+var import_url = require("url");
 var import_path2 = require("path");
+var import_child_process = require("child_process");
+var import_os2 = require("os");
+
+// src/stats.ts
+function mean(samples) {
+  if (samples.length === 0) return 0;
+  return samples.reduce((sum, value) => sum + value, 0) / samples.length;
+}
+function standardDeviation(samples) {
+  if (samples.length <= 1) return 0;
+  const avg = mean(samples);
+  const variance = samples.reduce((sum, value) => sum + (value - avg) ** 2, 0) / (samples.length - 1);
+  return Math.sqrt(variance);
+}
+
+// src/runner.ts
+var import_meta3 = {};
 async function runBenchmark(target) {
   try {
-    const mod = await loadBenchmarkModule(target.file);
-    const funcName = getFuncName(target);
-    const defaultExport = mod.default;
-    const fn = mod[funcName] || defaultExport?.[funcName];
-    if (!fn || typeof fn !== "function") {
-      console.error(`  Could not find function "${funcName}" in ${target.file}`);
-      return null;
-    }
+    const { fn } = await resolveBenchmarkFunction(target);
     const bench = new Bench({
       iterations: target.options.iterations ?? 100,
       warmupIterations: 10
@@ -31360,6 +31374,29 @@ async function runBenchmark(target) {
     return null;
   }
 }
+async function runBenchmarkWithSamples(target2, sampleCount = 10) {
+  const samples = [];
+  const runs = [];
+  for (let i7 = 0; i7 < sampleCount; i7 += 1) {
+    const result2 = await runBenchmark(target2);
+    if (!result2) {
+      return null;
+    }
+    runs.push(result2);
+    samples.push(result2.opsPerSec);
+  }
+  const avgMs2 = runs.reduce((sum, run2) => sum + run2.avgMs, 0) / runs.length;
+  const p99Ms2 = runs.reduce((sum, run2) => sum + run2.p99Ms, 0) / runs.length;
+  const opsPerSec2 = samples.reduce((sum, value) => sum + value, 0) / samples.length;
+  return {
+    name: target2.name,
+    opsPerSec: opsPerSec2,
+    avgMs: avgMs2,
+    p99Ms: p99Ms2,
+    samples,
+    stdDevOpsPerSec: standardDeviation(samples)
+  };
+}
 async function loadBenchmarkModule(file) {
   const fileUrl = (0, import_url.pathToFileURL)(file).href;
   if ([".ts", ".tsx", ".mts", ".cts"].includes((0, import_path2.extname)(file))) {
@@ -31375,12 +31412,12 @@ function getFuncName(target2) {
   let match;
   while ((match = BENCH_PATTERN2.exec(content)) !== null) {
     const optStr = match[1] || "";
-    const funcName2 = match[3] || match[4];
+    const funcName = match[3] || match[4];
     const labelMatch = optStr.match(/label\s*=\s*"([^"]*)"/);
     const nameMatch = optStr.match(/name\s*=\s*"([^"]*)"/);
     const label = labelMatch?.[1] ?? nameMatch?.[1];
-    if (label === target2.name || funcName2 === target2.name) {
-      return funcName2;
+    if (label === target2.name || funcName === target2.name) {
+      return funcName;
     }
   }
   return target2.name;
@@ -31393,15 +31430,215 @@ async function runAll(targets) {
   }
   return results;
 }
+async function runAllWithSamples(targets, sampleCount = 10) {
+  const results = [];
+  for (const target2 of targets) {
+    const result2 = await runBenchmarkWithSamples(target2, sampleCount);
+    if (result2) results.push(result2);
+  }
+  return results;
+}
+async function profileBenchmark(target2, durationMs = 2e3) {
+  const tempDir = (0, import_fs5.mkdtempSync)((0, import_path2.join)((0, import_os2.tmpdir)(), "bench-this-prof-"));
+  const profileArgs = getProfileWorkerArgs(target2, durationMs);
+  try {
+    const workerOutput = await runProcess(process.execPath, profileArgs, tempDir);
+    const logFile = await findProfileLog(tempDir);
+    const processed = await runProcess(process.execPath, ["--prof-process", logFile], tempDir);
+    const totalTimeMs = parseProfileWorkerOutput(workerOutput);
+    const funcName = getFuncName(target2);
+    const hotspots = parseHotspots(processed, (0, import_path2.resolve)(target2.file), funcName).slice(0, 5);
+    return {
+      name: target2.name,
+      totalTimeMs,
+      hotspots,
+      suggestion: buildSuggestion(hotspots)
+    };
+  } catch (err) {
+    console.error(`  Error profiling benchmark "${target2.name}":`, err);
+    return null;
+  } finally {
+    (0, import_fs5.rmSync)(tempDir, { recursive: true, force: true });
+  }
+}
+async function profileAll(targets, durationMs = 2e3) {
+  const results = [];
+  for (const target2 of targets) {
+    const result2 = await profileBenchmark(target2, durationMs);
+    if (result2) results.push(result2);
+  }
+  return results;
+}
+async function resolveBenchmarkFunction(target2) {
+  const mod = await loadBenchmarkModule(target2.file);
+  const funcName = getFuncName(target2);
+  const defaultExport = mod.default;
+  const fn3 = mod[funcName] || defaultExport?.[funcName];
+  if (!fn3 || typeof fn3 !== "function") {
+    throw new Error(`Could not find function "${funcName}" in ${target2.file}`);
+  }
+  return { fn: fn3, funcName };
+}
+function getProfileWorkerArgs(target2, durationMs) {
+  const jsWorkerPath = new URL("./profile-worker.js", import_meta3.url);
+  const tsWorkerPath = new URL("./profile-worker.ts", import_meta3.url);
+  const funcName = getFuncName(target2);
+  const input = target2.options.input ?? "";
+  if ((0, import_path2.extname)((0, import_url.fileURLToPath)(import_meta3.url)) === ".js") {
+    return ["--prof", (0, import_url.fileURLToPath)(jsWorkerPath), target2.file, funcName, input, String(durationMs)];
+  }
+  const tsxCliPath = new URL("../node_modules/tsx/dist/cli.mjs", import_meta3.url);
+  return ["--prof", (0, import_url.fileURLToPath)(tsxCliPath), (0, import_url.fileURLToPath)(tsWorkerPath), target2.file, funcName, input, String(durationMs)];
+}
+function runProcess(command, args, cwd) {
+  return new Promise((resolvePromise, reject) => {
+    const child = (0, import_child_process.spawn)(command, args, {
+      cwd,
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolvePromise(stdout);
+        return;
+      }
+      reject(new Error(stderr.trim() || `Process exited with code ${code}`));
+    });
+  });
+}
+async function findProfileLog(cwd) {
+  const { readdir } = await import("node:fs/promises");
+  const files = await readdir(cwd);
+  const logFile = files.find((file) => file.startsWith("isolate-") && file.endsWith("-v8.log"));
+  if (!logFile) {
+    throw new Error("CPU profile log was not generated.");
+  }
+  return (0, import_path2.join)(cwd, logFile);
+}
+function parseProfileWorkerOutput(stdout) {
+  const lastLine = stdout.trim().split("\n").filter(Boolean).at(-1);
+  if (!lastLine) return 0;
+  try {
+    const payload = JSON.parse(lastLine);
+    return payload.totalTimeMs ?? 0;
+  } catch {
+    return 0;
+  }
+}
+function parseHotspots(output, targetFile, funcName) {
+  const hotspots = [];
+  const lines = output.split("\n");
+  const totalTicks = parseTotalTicks(output);
+  let section = "other";
+  for (const line of lines) {
+    if (line.startsWith(" [JavaScript]:")) {
+      section = "javascript";
+      continue;
+    }
+    if (line.startsWith(" [C++]:")) {
+      section = "cpp";
+      continue;
+    }
+    if (line.startsWith(" [Bottom up")) {
+      section = "bottomup";
+      continue;
+    }
+    if (line.startsWith(" [Summary]:") || line.startsWith(" [Shared libraries]:")) {
+      section = "other";
+      continue;
+    }
+    if (section === "javascript") {
+      const match = line.match(/^\s*\d+\s+([\d.]+)%\s+[\d.]+%\s+(?:JS|Script):\s+[~*^]?(.+?)\s+(file:\/\/\S+|\/\S+):(\d+):\d+\s*$/);
+      if (!match) continue;
+      const [, pct, rawName, rawFile, rawLine] = match;
+      const file = normalizeProfileFile(rawFile);
+      hotspots.push({
+        name: rawName.trim(),
+        percentage: Number(pct),
+        file,
+        line: Number(rawLine),
+        isUserCode: (0, import_path2.resolve)(file) === targetFile && rawName.trim() === funcName
+      });
+      continue;
+    }
+    if (section === "cpp") {
+      const match = line.match(/^\s*\d+\s+([\d.]+)%\s+[\d.]+%\s+t\s+(_Builtins_[A-Za-z0-9_]+)\s*$/);
+      if (!match) continue;
+      const [, pct, builtinName] = match;
+      hotspots.push({
+        name: formatBuiltinName(builtinName),
+        percentage: Number(pct),
+        isUserCode: false
+      });
+    }
+    if (section === "bottomup" && totalTicks > 0) {
+      const match = line.match(/^\s*(\d+)\s+[\d.]+%\s+(?:JS|Script):\s+[+^~*]?(.+?)\s+(file:\/\/\S+|\/\S+):(\d+):\d+\s*$/);
+      if (!match) continue;
+      const [, ticks, rawName, rawFile, rawLine] = match;
+      const file = normalizeProfileFile(rawFile);
+      const percentage = Number(ticks) / totalTicks * 100;
+      hotspots.push({
+        name: rawName.trim(),
+        percentage,
+        file,
+        line: Number(rawLine),
+        isUserCode: (0, import_path2.resolve)(file) === targetFile && rawName.trim() === funcName
+      });
+    }
+  }
+  hotspots.sort((a7, b3) => b3.percentage - a7.percentage);
+  return dedupeHotspots(hotspots);
+}
+function parseTotalTicks(output) {
+  const match = output.match(/\((\d+) ticks,/);
+  return match ? Number(match[1]) : 0;
+}
+function normalizeProfileFile(rawFile) {
+  if (rawFile.startsWith("file://")) {
+    return (0, import_url.fileURLToPath)(rawFile);
+  }
+  return rawFile;
+}
+function formatBuiltinName(name) {
+  return name.replace(/^_Builtins_/, "").replace(/^ArrayPrototype/, "Array.prototype.").replace(/^TypedArrayPrototypeJoin$/, "TypedArray.prototype.join").replace(/^ArrayPrototypeJoinImpl$/, "Array.prototype.join").replace(/^ArrayPrototypeUnshift$/, "Array.prototype.unshift").replace(/^JSONParse$/, "JSON.parse");
+}
+function dedupeHotspots(hotspots) {
+  const seen = /* @__PURE__ */ new Set();
+  return hotspots.filter((hotspot) => {
+    const key = `${hotspot.name}:${hotspot.file ?? ""}:${hotspot.line ?? ""}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+function buildSuggestion(hotspots) {
+  const suggestionTarget = hotspots.find((hotspot) => !hotspot.isUserCode);
+  if (!suggestionTarget) return void 0;
+  if (suggestionTarget.name === "Array.prototype.map") {
+    return `Array.map accounts for ${suggestionTarget.percentage.toFixed(0)}% \u2014 consider using a for loop for hot paths`;
+  }
+  if (suggestionTarget.name === "JSON.parse") {
+    return `JSON.parse accounts for ${suggestionTarget.percentage.toFixed(0)}% \u2014 consider parsing once and reusing the result`;
+  }
+  return void 0;
+}
 
 // src/action.ts
-var execFileAsync = (0, import_util.promisify)(import_child_process.execFile);
+var execFileAsync = (0, import_util.promisify)(import_child_process2.execFile);
 async function run() {
   const threshold = parseNumberInput("threshold", 20);
   const filePatterns = parsePatterns(core.getInput("files") || "src/**/*.ts");
   const baselineBranch = core.getInput("baseline-branch") || "main";
   const workspace = process.env.GITHUB_WORKSPACE || process.cwd();
-  const baselineDir = (0, import_fs6.mkdtempSync)((0, import_path3.join)((0, import_os2.tmpdir)(), "bench-this-baseline-"));
+  const baselineDir = (0, import_fs6.mkdtempSync)((0, import_path3.join)((0, import_os3.tmpdir)(), "bench-this-baseline-"));
   let originalRef = null;
   try {
     const refs = await prepareRefs(baselineBranch);

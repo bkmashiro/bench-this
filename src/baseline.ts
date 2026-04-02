@@ -8,12 +8,17 @@ export interface BaselineEntry {
   opsPerSec: number
   avgMs: number
   savedAt: string
+  samples?: number[]
+  stdDevOpsPerSec?: number
 }
 
 export type Baseline = Record<string, BaselineEntry>
 
 export function loadBaseline(cwd = process.cwd()): Baseline | null {
-  const filePath = path.join(cwd, BASELINE_FILE)
+  return loadBaselineFile(path.join(cwd, BASELINE_FILE))
+}
+
+export function loadBaselineFile(filePath: string): Baseline | null {
   if (!existsSync(filePath)) return null
   try {
     return JSON.parse(readFileSync(filePath, 'utf-8'))
@@ -31,6 +36,8 @@ export function saveBaseline(results: BenchResult[], cwd = process.cwd()): void 
       opsPerSec: r.opsPerSec,
       avgMs: r.avgMs,
       savedAt: new Date().toISOString().split('T')[0],
+      samples: r.samples,
+      stdDevOpsPerSec: r.stdDevOpsPerSec,
     }
   }
 

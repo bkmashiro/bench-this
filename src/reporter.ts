@@ -1,6 +1,8 @@
 import chalk from 'chalk'
 import type { BenchResult } from './runner.js'
+import type { ProfileResult } from './runner.js'
 import type { Baseline } from './baseline.js'
+import type { SignificanceResult } from './stats.js'
 
 export interface CompareResult {
   result: BenchResult
@@ -124,4 +126,68 @@ export function printList(targets: import('./extractor.js').BenchTarget[]): void
   console.log()
   console.log(chalk.dim(`${targets.length} function${targets.length !== 1 ? 's' : ''} found`))
   console.log()
+}
+
+export interface StatsReportEntry {
+  name: string
+  current: BenchResult
+  baseline?: { opsPerSec: number; samples?: number[] }
+  significance?: SignificanceResult
+}
+
+export function printProfileReport(results: ProfileResult[]): void {
+  for (const result of results) {
+    console.log(`Profiling ${result.name}...`)
+    console.log(`  Total time: ${(result.totalTimeMs / 1000).toFixed(1)}s`)
+    console.log()
+    console.log('  Hotspots:')
+
+    if (result.hotspots.length === 0) {
+      console.log('    No JavaScript hotspots collected from V8 for this run.')
+    }
+
+    for (const hotspot of result.hotspots.slice(0, 3)) {
+      const location = hotspot.file && hotspot.line ? ` (${hotspot.file}:${hotspot.line})` : ''
+      const marker = hotspot.isUserCode ? '  <- your function' : ''
+      console.log(`    ${hotspot.name.padEnd(22)} ${hotspot.percentage.toFixed(0)}%${location}${marker}`)
+    }
+
+    if (result.suggestion) {
+      console.log()
+      console.log(`  Suggestion: ${result.suggestion}`)
+    }
+
+    console.log()
+  }
+}
+
+export function printStatsReport(entries: StatsReportEntry[]): void {
+  for (const entry of entries) {
+    const currentOps = fmtOps(entry.current.opsPerSec)
+    const baselineOps = entry.baseline ? fmtOps(entry.baseline.opsPerSec) : 'n/a'
+    console.log(`${entry.name}: current ${currentOps} ops/sec vs baseline ${baselineOps} ops/sec`)
+
+    if (!entry.baseline) {
+      console.log('  No baseline entry found.')
+      console.log()
+      continue
+    }
+
+    if (!entry.significance) {
+      console.log('  Missing repeated samples in baseline; re-save the baseline to enable significance testing.')
+      console.log()
+      continue
+    }
+
+    const deltaSign = entry.significance.deltaPct >= 0 ? '+' : ''
+    const significanceLabel = entry.significance.isSignificant
+      ? 'statistically significant (p < 0.05)'
+      : 'NOT significant (likely noise)'
+    const indicator = entry.significance.isSignificant ? '✅' : '⚠'
+
+    console.log(
+      `  Δ = ${deltaSign}${entry.significance.deltaPct.toFixed(1)}%  p-value = ${entry.significance.pValue.toFixed(3)} ${indicator} ${significanceLabel}`,
+    )
+    console.log()
+  }
 }

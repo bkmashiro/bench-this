@@ -17,6 +17,8 @@ function sampleResults(): BenchResult[] {
       opsPerSec: 12345,
       avgMs: 0.081,
       p99Ms: 0.12,
+      samples: [12300, 12400, 12335],
+      stdDevOpsPerSec: 50.332229568,
     },
   ]
 }
@@ -79,6 +81,20 @@ test('baseline writes benchmark payload with savedAt metadata', () => {
     const raw = JSON.parse(readFileSync(path.join(dir, '.bench-baseline.json'), 'utf8'))
 
     assert.match(raw.addNumbers.savedAt, /^\d{4}-\d{2}-\d{2}$/)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('baseline preserves repeated samples and standard deviation when present', () => {
+  const dir = makeTempDir()
+
+  try {
+    saveBaseline(sampleResults(), dir)
+    const baseline = loadBaseline(dir)
+
+    assert.deepEqual(baseline?.addNumbers.samples, [12300, 12400, 12335])
+    assert.equal(baseline?.addNumbers.stdDevOpsPerSec, 50.332229568)
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
