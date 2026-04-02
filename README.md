@@ -1,3 +1,5 @@
+[![npm](https://img.shields.io/npm/v/bench-this)](https://www.npmjs.com/package/bench-this) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # bench-this
 
 A TypeScript CLI tool that scans source files for `// @bench` comments and runs performance benchmarks with regression detection.
@@ -150,4 +152,4 @@ pnpm dev run test/fixtures/
 
 ## License
 
-ISC
+MIT

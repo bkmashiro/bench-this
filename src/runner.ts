@@ -1,7 +1,7 @@
 import { Bench } from 'tinybench'
 import { pathToFileURL } from 'url'
 import { readFileSync } from 'fs'
-import { extname } from 'path'
+import { extname, join } from 'path'
 import type { BenchTarget } from './extractor.js'
 
 export interface BenchResult {
@@ -80,7 +80,8 @@ async function loadBenchmarkModule(file: string): Promise<Record<string, unknown
 
   if (['.ts', '.tsx', '.mts', '.cts'].includes(extname(file))) {
     const { tsImport } = await import('tsx/esm/api')
-    return tsImport(fileUrl, import.meta.url) as Promise<Record<string, unknown>>
+    const parentUrl = pathToFileURL(join(process.cwd(), '__bench-this_runner__.mjs')).href
+    return tsImport(fileUrl, parentUrl) as Promise<Record<string, unknown>>
   }
 
   return import(fileUrl) as Promise<Record<string, unknown>>
