@@ -53,18 +53,14 @@ export async function runBenchmark(target: BenchTarget): Promise<BenchResult | n
     if (!task?.result) return null
 
     // tinybench v6 changed the result structure
-    const result = task.result as {
+    const result = task.result as unknown as {
       throughput?: { mean?: number }
       latency?: { mean?: number; p99?: number }
-      // legacy fields for older versions
-      hz?: number
-      mean?: number
-      p99?: number
     }
 
-    const opsPerSec = result.throughput?.mean ?? result.hz ?? 0
-    const avgMs = result.latency?.mean ?? result.mean ?? 0
-    const p99Ms = result.latency?.p99 ?? result.p99 ?? 0
+    const opsPerSec = result.throughput?.mean ?? 0
+    const avgMs = result.latency?.mean ?? 0
+    const p99Ms = result.latency?.p99 ?? 0
 
     return {
       name: target.name,
