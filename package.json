@@ -1,29 +1,40 @@
 {
   "name": "bench-this",
-  "version": "0.1.0",
-  "description": "Run @bench annotated functions and track regressions",
+  "version": "0.1.1",
+  "description": "Run @bench annotated functions and track performance regressions",
   "type": "module",
+  "main": "dist/index.js",
   "bin": {
-    "bench-this": "./src/index.ts"
+    "bench-this": "dist/index.js"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "benchmark",
+    "performance",
+    "cli",
+    "regression",
+    "devtools"
+  ],
+  "author": "bkmsr",
+  "license": "MIT",
   "packageManager": "pnpm@10.30.3",
   "dependencies": {
-    "@types/node": "^25.5.0",
     "chalk": "^5.6.2",
     "commander": "^14.0.3",
     "glob": "^13.0.6",
-    "tinybench": "^6.0.0",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
+    "tinybench": "^6.0.0"
   },
   "devDependencies": {
-    "@types/glob": "^9.0.0"
+    "@types/glob": "^9.0.0",
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
   }
 }
