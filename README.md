@@ -16,7 +16,7 @@ npx bench-this
 
 ### Annotate your functions
 
-Add a `// @bench` comment directly before any function you want to benchmark:
+Add a `// @bench` comment directly before any function you want to benchmark (TypeScript/JavaScript), or a `# @bench` comment in Python:
 
 ```ts
 // @bench
@@ -38,6 +38,32 @@ export function validateEmail(email: string): boolean {
 export function formatDate(date: Date): string {
   return date.toISOString().split('T')[0]
 }
+```
+
+### Python
+
+```python
+# @bench
+def parse_csv(input):
+    return [line.split(',') for line in input.split('\n')]
+
+# @bench name="Sort large list" iterations=200
+def sort_numbers(lst):
+    return sorted(lst)
+
+# @bench input='hello@world.com'
+def validate_email(email):
+    import re
+    return bool(re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email))
+```
+
+Run benchmarks across both JS/TS and Python files:
+
+```bash
+bench-this run src/          # auto-detects .ts, .js, and .py files
+bench-this run src/ --lang py   # Python only
+bench-this run src/ --lang js   # JS/TS only
+bench-this run src/ --lang js,py  # explicit both
 ```
 
 ### @bench annotation options
@@ -74,6 +100,7 @@ Options:
 - `--threshold <n>` — Regression threshold as a percentage (default: `10`)
 - `--json` — Output results as JSON
 - `--ci` — Exit with code 1 if any regressions are found
+- `--lang <langs>` — Comma-separated languages to include: `js`, `py` (default: auto-detect from file extensions)
 
 #### `bench-this --watch [dir] [path]`
 
