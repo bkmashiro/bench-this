@@ -14,9 +14,19 @@ const packageJson = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
 ) as { version: string }
 
-function parseLangs(langOpt: string | undefined): ('js' | 'py')[] {
+export function parseLangs(langOpt: string | undefined): ('js' | 'py')[] {
   if (!langOpt) return ['js', 'py']
-  return langOpt.split(',').map(s => s.trim()).filter((s): s is 'js' | 'py' => s === 'js' || s === 'py')
+  const valid = langOpt.split(',').map(s => s.trim()).filter((s): s is 'js' | 'py' => s === 'js' || s === 'py')
+  if (valid.length === 0) {
+    console.warn(`Warning: no valid languages found in --lang "${langOpt}". Valid values: js, py`)
+  }
+  return valid
+}
+
+export function parseThreshold(raw: string): number | null {
+  const value = parseFloat(raw)
+  if (Number.isNaN(value) || value < 0 || !Number.isFinite(value)) return null
+  return value
 }
 
 async function runBenchmarksWithBaseline(searchPath: string, opts: { threshold: string; json?: boolean; ci?: boolean; lang?: string }): Promise<void> {
@@ -29,7 +39,11 @@ async function runBenchmarksWithBaseline(searchPath: string, opts: { threshold: 
   console.log(`Running ${targets.length} benchmark${targets.length !== 1 ? 's' : ''}...`)
   const results = await runAll(targets)
   const baseline = loadBaseline() ?? {}
-  const threshold = parseFloat(opts.threshold)
+  const threshold = parseThreshold(opts.threshold)
+  if (threshold === null) {
+    console.error(`Error: --threshold must be a non-negative finite number (got "${opts.threshold}")`)
+    process.exit(1)
+  }
   const comparisons = compare(results, baseline, threshold)
 
   printReport(comparisons, opts.json, threshold)
