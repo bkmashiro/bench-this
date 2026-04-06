@@ -129,8 +129,9 @@ function collectBenchTargets(files: string[]): BenchTarget[] {
   for (const file of files) {
     try {
       allTargets.push(...extractBenchTargets(file))
-    } catch {
-      // skip files that can't be read
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      console.warn(`bench-this: skipping ${file}: ${message}`)
     }
   }
 
