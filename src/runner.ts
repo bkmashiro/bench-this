@@ -117,6 +117,18 @@ export async function runBenchmark(target: BenchTarget): Promise<BenchResult | n
   }
 }
 
+/**
+ * Runs a benchmark target multiple times and aggregates the results into a
+ * single {@link BenchResult} that includes per-sample ops/sec values and their
+ * standard deviation. Useful for statistical significance testing.
+ *
+ * @param target - The benchmark target to run.
+ * @param sampleCount - Number of independent benchmark runs to collect
+ *   (default: 10). Each run goes through its own warm-up phase.
+ * @returns A result whose `samples` array contains every individual ops/sec
+ *   reading and whose top-level `opsPerSec` / `avgMs` / `p99Ms` are the means
+ *   across all runs. Returns `null` if any individual run fails.
+ */
 export async function runBenchmarkWithSamples(target: BenchTarget, sampleCount = 10): Promise<BenchResult | null> {
   const samples: number[] = []
   const runs: BenchResult[] = []
@@ -157,6 +169,22 @@ async function loadBenchmarkModule(file: string): Promise<Record<string, unknown
   return import(fileUrl) as Promise<Record<string, unknown>>
 }
 
+/**
+ * Returns the real exported function name for a benchmark target.
+ *
+ * When a target carries a `label` / `name` option, the stored `target.name` is
+ * the human-readable label rather than the JavaScript identifier. This function
+ * re-reads the source file (`target.file`) and re-runs the `@bench` annotation
+ * regex to find the annotation whose label matches `target.name`, then returns
+ * the corresponding identifier. Falls back to `target.name` when no match is
+ * found (i.e. the target was never labelled and the name already is the
+ * identifier).
+ *
+ * **Side effect**: reads `target.file` from disk on every call.
+ *
+ * @param target - The benchmark target whose real function name is needed.
+ * @returns The JavaScript identifier of the annotated function.
+ */
 function getFuncName(target: BenchTarget): string {
   // If there's a label, we stored the label as name; need to find actual func name
   // Re-extract from file to get the real function name
@@ -197,6 +225,25 @@ export async function runAllWithSamples(targets: BenchTarget[], sampleCount = 10
   return results
 }
 
+/**
+ * Profiles a single benchmark function using the V8 CPU profiler (`--prof`)
+ * and returns the top hotspots found in the generated tick log.
+ *
+ * **Side effects**:
+ * - Creates a temporary directory under the OS temp dir
+ *   (`os.tmpdir()/bench-this-prof-*`) to hold the V8 isolate log.
+ * - Spawns two child processes: one to run the benchmark under `--prof` and
+ *   one to post-process the resulting log with `--prof-process`.
+ * - The temporary directory is always deleted in the `finally` block,
+ *   regardless of success or failure.
+ *
+ * @param target - The benchmark target to profile.
+ * @param durationMs - How long (in milliseconds) to run the benchmark function
+ *   inside the profiler worker (default: 2000).
+ * @returns A {@link ProfileResult} with the function name, total wall-clock
+ *   time, up to five deduplicated hotspots, and an optional optimisation
+ *   suggestion. Returns `null` if profiling fails for any reason.
+ */
 export async function profileBenchmark(target: BenchTarget, durationMs = 2000): Promise<ProfileResult | null> {
   const tempDir = mkdtempSync(join(tmpdir(), 'bench-this-prof-'))
   const profileArgs = getProfileWorkerArgs(target, durationMs)
@@ -223,6 +270,17 @@ export async function profileBenchmark(target: BenchTarget, durationMs = 2000): 
   }
 }
 
+/**
+ * Profiles every target in `targets` sequentially and collects the results.
+ * Targets that return `null` from {@link profileBenchmark} are silently
+ * dropped from the output array.
+ *
+ * @param targets - List of benchmark targets to profile.
+ * @param durationMs - Per-target profiling duration in milliseconds
+ *   (default: 2000). Passed through to {@link profileBenchmark}.
+ * @returns Array of successful {@link ProfileResult} objects, one per
+ *   successfully profiled target (may be shorter than `targets`).
+ */
 export async function profileAll(targets: BenchTarget[], durationMs = 2000): Promise<ProfileResult[]> {
   const results: ProfileResult[] = []
   for (const target of targets) {
