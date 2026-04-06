@@ -6,7 +6,7 @@ import { randomBytes } from 'crypto'
 import type { BenchTarget } from './extractor.js'
 import type { BenchResult } from './runner.js'
 
-function buildHarnessScript(target: BenchTarget, funcName: string): string {
+export function buildHarnessScript(target: BenchTarget, funcName: string): string {
   const modulePath = target.file.replace(/\\/g, '/')
   const iterations = target.options.iterations ?? 1000
   const inputRepr = target.options.input !== undefined ? target.options.input : 'None'
@@ -33,7 +33,7 @@ print(json.dumps({"opsPerSec": ops_per_sec, "avgMs": avg_ms, "p99Ms": avg_ms}))
 `.trim()
 }
 
-function getPyFuncName(target: BenchTarget): string {
+export function getPyFuncName(target: BenchTarget): string {
   const content = readFileSync(target.file, 'utf-8')
   const PY_BENCH_PATTERN = /#\s*@bench([^\n]*)\n\s*(?:async\s+)?def\s+(\w+)/gm
 
