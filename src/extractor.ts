@@ -45,8 +45,8 @@ function parseOptions(optStr: string): BenchTarget['options'] {
   const iterMatch = optStr.match(/iterations\s*=\s*(\d+)/)
   if (iterMatch) opts.iterations = parseInt(iterMatch[1])
 
-  const inputMatch = optStr.match(/input\s*=\s*'([^']*)'/)
-  if (inputMatch) opts.input = inputMatch[1]
+  const inputMatch = optStr.match(/input\s*=\s*(['"])([^'"]*?)\1/)
+  if (inputMatch) opts.input = inputMatch[2]
 
   return opts
 }
