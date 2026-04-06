@@ -237,6 +237,19 @@ test('reporter treats pctChange exactly equal to threshold as stable (not improv
   assert.match(output, /stable/)
 })
 
+test('reporter treats 0% threshold as exact equality: any deviation is flagged', () => {
+  const regressing: CompareResult = {
+    result: { name: 'tinySlower', opsPerSec: 99, avgMs: 1.01, p99Ms: 1.1 },
+    baseline: { opsPerSec: 100, avgMs: 1, savedAt: '2026-04-02' },
+    pctChange: -1,
+    isRegression: true,
+  }
+
+  const output = captureReport([regressing], 0)
+  assert.match(output, /regression/)
+})
+
+
 test('printList shows iteration and input metadata when present', () => {
   const output = captureLogs(() => {
     printList([
