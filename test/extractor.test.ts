@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { extractBenchTargets, findBenchTargets, findBenchTargetsByGlob } from '../src/extractor.ts'
@@ -279,6 +279,37 @@ test('findBenchTargetsByGlob deduplicates matches across patterns', async () => 
 
     assert.equal(targets.length, 1)
     assert.equal(targets[0].name, 'deduped')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('collectBenchTargets warns and skips unreadable files', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-warn-'))
+  const goodFile = path.join(dir, 'good.ts')
+  const badFile = path.join(dir, 'bad.ts')
+
+  try {
+    writeFileSync(goodFile, '// @bench\nexport function good() { return 1 }\n')
+    writeFileSync(badFile, '// @bench\nexport function bad() { return 2 }\n')
+    chmodSync(badFile, 0o000)
+
+    const warnings: string[] = []
+    const originalWarn = console.warn
+    console.warn = (...args: unknown[]) => warnings.push(args.join(' '))
+
+    try {
+      const targets = await findBenchTargets(dir)
+
+      assert.equal(targets.length, 1)
+      assert.equal(targets[0].name, 'good')
+      assert.equal(warnings.length, 1)
+      assert.match(warnings[0], /bench-this: skipping/)
+      assert.match(warnings[0], /bad\.ts/)
+    } finally {
+      console.warn = originalWarn
+      chmodSync(badFile, 0o644)
+    }
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
