@@ -20,6 +20,18 @@ export interface CompareBranchesDependencies {
   log?: (...args: unknown[]) => void
 }
 
+/**
+ * Computes the diff between two sets of benchmark results.
+ *
+ * Merges `currentResults` and `branchResults` by benchmark name. Each name present
+ * in either set produces one {@link BranchCompareResult}. The `pctChange` is expressed
+ * as `((current - branch) / branch) * 100`, so a positive value means the current
+ * branch is faster. When `branch.opsPerSec` is zero, `pctChange` is `undefined`.
+ *
+ * @param currentResults - Results measured on the current branch.
+ * @param branchResults - Results measured on the target branch being compared against.
+ * @returns An array of comparison entries sorted alphabetically by benchmark name.
+ */
 export function diffBenchmarkResults(
   currentResults: BenchResult[],
   branchResults: BenchResult[],
@@ -54,6 +66,18 @@ export function diffBenchmarkResults(
   })
 }
 
+/**
+ * Prints a human-readable branch comparison table to the provided logger.
+ *
+ * Each comparison is rendered on its own line showing the ops/sec for both branches,
+ * the percentage change, and a status indicator (✅ improved / ⚠ regression / unchanged).
+ * Benchmarks missing from one branch are clearly labelled.
+ *
+ * @param comparisons - Diff entries produced by {@link diffBenchmarkResults}.
+ * @param currentBranch - Name of the current branch (shown in "new on X" messages).
+ * @param targetBranch - Name of the branch being compared against (shown as a column header).
+ * @param log - Logger function; defaults to `console.log`.
+ */
 export function printBranchComparison(
   comparisons: BranchCompareResult[],
   currentBranch: string,
@@ -94,6 +118,27 @@ export function printBranchComparison(
   log()
 }
 
+/**
+ * Runs benchmarks on the current branch and `targetBranch`, then returns the diff.
+ *
+ * The function:
+ * 1. Records the current branch name and checks for uncommitted changes.
+ * 2. Runs benchmarks against the current working tree.
+ * 3. Stashes any local changes (if present), checks out `targetBranch`, and runs
+ *    benchmarks there.
+ * 4. Always restores the original branch and pops the stash in a `finally` block,
+ *    even if benchmarking fails.
+ *
+ * All side-effecting operations (git, benchmark runner, discovery, logging) are
+ * injectable via `deps` to support testing without spawning real processes.
+ *
+ * @param searchPath - Directory to search for benchmark targets.
+ * @param targetBranch - Git branch to compare the current branch against.
+ * @param deps - Optional dependency overrides for testing.
+ * @returns The comparison results, one entry per unique benchmark name across both branches.
+ * @throws {Error} If git operations fail (e.g. branch does not exist, merge conflicts
+ *   prevent stash pop) or if benchmarks throw.
+ */
 export async function compareAgainstBranch(
   searchPath: string,
   targetBranch: string,
