@@ -6,6 +6,7 @@ export interface BenchTarget {
   name: string
   file: string
   line: number
+  lang: 'js' | 'py'
   options: {
     label?: string
     iterations?: number
@@ -14,6 +15,8 @@ export interface BenchTarget {
 }
 
 const BENCH_PATTERN = /\/\/\s*@bench([^\n]*)\n\s*((?:export\s+)?(?:async\s+)?function\s+(\w+)|(?:export\s+)?(?:const|let)\s+(\w+)\s*=\s*(?:async\s+)?\()/gm
+
+const PY_BENCH_PATTERN = /#\s*@bench([^\n]*)\n\s*(?:async\s+)?def\s+(\w+)/gm
 
 function parseOptions(optStr: string): BenchTarget['options'] {
   const opts: BenchTarget['options'] = {}
@@ -37,6 +40,31 @@ export function extractBenchTargets(filePath: string): BenchTarget[] {
   const content = readFileSync(filePath, 'utf-8')
   const targets: BenchTarget[] = []
 
+  if (filePath.endsWith('.py')) {
+    let match: RegExpExecArray | null
+    PY_BENCH_PATTERN.lastIndex = 0
+
+    while ((match = PY_BENCH_PATTERN.exec(content)) !== null) {
+      const optStr = match[1] || ''
+      const funcName = match[2]
+
+      if (!funcName) continue
+
+      const lineNum = content.slice(0, match.index).split('\n').length
+      const opts = parseOptions(optStr)
+
+      targets.push({
+        name: opts.label || funcName,
+        file: filePath,
+        line: lineNum,
+        lang: 'py',
+        options: opts,
+      })
+    }
+
+    return targets
+  }
+
   let match: RegExpExecArray | null
   BENCH_PATTERN.lastIndex = 0
 
@@ -53,6 +81,7 @@ export function extractBenchTargets(filePath: string): BenchTarget[] {
       name: opts.label || funcName,
       file: filePath,
       line: lineNum,
+      lang: 'js',
       options: opts,
     })
   }
@@ -60,12 +89,17 @@ export function extractBenchTargets(filePath: string): BenchTarget[] {
   return targets
 }
 
-export async function findBenchTargets(searchPath: string): Promise<BenchTarget[]> {
+export async function findBenchTargets(searchPath: string, langs: ('js' | 'py')[] = ['js', 'py']): Promise<BenchTarget[]> {
   const stats = await import('fs').then(fs => fs.promises.stat(searchPath).catch(() => null))
+
+  const globParts: string[] = []
+  if (langs.includes('js')) globParts.push('ts', 'js')
+  if (langs.includes('py')) globParts.push('py')
+  const ext = globParts.length === 1 ? globParts[0] : `{${globParts.join(',')}}`
 
   let files: string[]
   if (stats?.isDirectory()) {
-    files = await resolveBenchFiles(['**/*.{ts,js}'], searchPath)
+    files = await resolveBenchFiles([`**/*.${ext}`], searchPath)
   } else {
     files = stats?.isFile()
       ? [path.resolve(searchPath)]

@@ -6,6 +6,7 @@ import { spawn } from 'child_process'
 import { tmpdir } from 'os'
 import type { BenchTarget } from './extractor.js'
 import { standardDeviation } from './stats.js'
+import { runPythonBenchmark } from './runner-py.js'
 
 export interface BenchResult {
   name: string
@@ -32,6 +33,10 @@ export interface ProfileResult {
 }
 
 export async function runBenchmark(target: BenchTarget): Promise<BenchResult | null> {
+  if (target.lang === 'py') {
+    return runPythonBenchmark(target)
+  }
+
   try {
     const { fn } = await resolveBenchmarkFunction(target)
 

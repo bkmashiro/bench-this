@@ -14,8 +14,13 @@ const packageJson = JSON.parse(
   readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
 ) as { version: string }
 
-async function runBenchmarksWithBaseline(searchPath: string, opts: { threshold: string; json?: boolean; ci?: boolean }): Promise<void> {
-  const targets = await findBenchTargets(searchPath)
+function parseLangs(langOpt: string | undefined): ('js' | 'py')[] {
+  if (!langOpt) return ['js', 'py']
+  return langOpt.split(',').map(s => s.trim()).filter((s): s is 'js' | 'py' => s === 'js' || s === 'py')
+}
+
+async function runBenchmarksWithBaseline(searchPath: string, opts: { threshold: string; json?: boolean; ci?: boolean; lang?: string }): Promise<void> {
+  const targets = await findBenchTargets(searchPath, parseLangs(opts.lang))
   if (targets.length === 0) {
     console.log('No @bench annotated functions found.')
     process.exit(0)
@@ -34,8 +39,8 @@ async function runBenchmarksWithBaseline(searchPath: string, opts: { threshold: 
   }
 }
 
-async function runProfiling(searchPath: string): Promise<void> {
-  const targets = await findBenchTargets(searchPath)
+async function runProfiling(searchPath: string, langs?: ('js' | 'py')[]): Promise<void> {
+  const targets = await findBenchTargets(searchPath, langs)
   if (targets.length === 0) {
     console.log('No @bench annotated functions found.')
     process.exit(0)
@@ -45,8 +50,8 @@ async function runProfiling(searchPath: string): Promise<void> {
   printProfileReport(results)
 }
 
-async function runStatisticalComparison(searchPath: string, baselinePath: string): Promise<void> {
-  const targets = await findBenchTargets(searchPath)
+async function runStatisticalComparison(searchPath: string, baselinePath: string, langs?: ('js' | 'py')[]): Promise<void> {
+  const targets = await findBenchTargets(searchPath, langs)
   if (targets.length === 0) {
     console.log('No @bench annotated functions found.')
     process.exit(0)
@@ -89,11 +94,14 @@ program
   .option('--compare <branch>', 'Compare benchmarks against another git branch')
   .option('--profile', 'Run V8 CPU profiling and show hotspots')
   .option('--stats <baseline>', 'Compare repeated benchmark samples against a baseline JSON file')
+  .option('--lang <langs>', 'Comma-separated languages to benchmark: js,py (default: auto-detect)')
   .action(async (searchPath, opts) => {
     if ([opts.watch !== undefined, Boolean(opts.compare), Boolean(opts.profile), Boolean(opts.stats)].filter(Boolean).length > 1) {
       console.error('Use only one of --watch, --compare, --profile, or --stats at a time.')
       process.exit(1)
     }
+
+    const langs = parseLangs(opts.lang)
 
     if (opts.compare) {
       await compareAgainstBranch(searchPath, opts.compare)
@@ -112,12 +120,12 @@ program
     }
 
     if (opts.profile) {
-      await runProfiling(searchPath)
+      await runProfiling(searchPath, langs)
       return
     }
 
     if (opts.stats) {
-      await runStatisticalComparison(searchPath, opts.stats)
+      await runStatisticalComparison(searchPath, opts.stats, langs)
       return
     }
 
@@ -132,19 +140,22 @@ program
   .option('--ci', 'Exit code 1 on regression')
   .option('--profile', 'Run V8 CPU profiling and show hotspots')
   .option('--stats <baseline>', 'Compare repeated benchmark samples against a baseline JSON file')
+  .option('--lang <langs>', 'Comma-separated languages to benchmark: js,py (default: auto-detect)')
   .action(async (searchPath = '.', opts) => {
     if (opts.profile && opts.stats) {
       console.error('Cannot use --profile and --stats together.')
       process.exit(1)
     }
 
+    const langs = parseLangs(opts.lang)
+
     if (opts.profile) {
-      await runProfiling(searchPath)
+      await runProfiling(searchPath, langs)
       return
     }
 
     if (opts.stats) {
-      await runStatisticalComparison(searchPath, opts.stats)
+      await runStatisticalComparison(searchPath, opts.stats, langs)
       return
     }
 
@@ -154,8 +165,9 @@ program
 program
   .command('save [path]')
   .description('Run benchmarks and save as new baseline')
-  .action(async (searchPath = '.') => {
-    const targets = await findBenchTargets(searchPath)
+  .option('--lang <langs>', 'Comma-separated languages to benchmark: js,py (default: auto-detect)')
+  .action(async (searchPath = '.', opts) => {
+    const targets = await findBenchTargets(searchPath, parseLangs(opts.lang))
     if (targets.length === 0) {
       console.log('No @bench annotated functions found.')
       process.exit(0)
@@ -170,8 +182,9 @@ program
 program
   .command('list [path]')
   .description('List all @bench annotated functions')
-  .action(async (searchPath = '.') => {
-    const targets = await findBenchTargets(searchPath)
+  .option('--lang <langs>', 'Comma-separated languages to benchmark: js,py (default: auto-detect)')
+  .action(async (searchPath = '.', opts) => {
+    const targets = await findBenchTargets(searchPath, parseLangs(opts.lang))
     printList(targets)
   })
 
