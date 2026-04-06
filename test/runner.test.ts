@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { runAll, runBenchmark } from '../src/runner.ts'
+import { runAll, runBenchmark, parseInput } from '../src/runner.ts'
 import type { BenchTarget } from '../src/extractor.ts'
 
 function withPatchedConsoleError<T>(fn: () => Promise<T>): Promise<T> {
@@ -96,30 +96,47 @@ test('runBenchmark resolves labeled targets back to the original exported functi
   }
 })
 
-test('runBenchmark falls back to the raw input string when JSON.parse fails', async () => {
+test('parseInput parses JSON values correctly', () => {
+  assert.deepEqual(parseInput('42'), 42)
+  assert.deepEqual(parseInput('"hello"'), 'hello')
+  assert.deepEqual(parseInput('[1,2,3]'), [1, 2, 3])
+  assert.deepEqual(parseInput('{"key":1}'), { key: 1 })
+  assert.deepEqual(parseInput('true'), true)
+  assert.deepEqual(parseInput('null'), null)
+})
+
+test('parseInput parses JS object literals that are not valid JSON', () => {
+  assert.deepEqual(parseInput('{key: 1}'), { key: 1 })
+  assert.deepEqual(parseInput("'hello'"), 'hello')
+})
+
+test('parseInput rejects expressions with identifiers that could have side-effects', () => {
+  assert.throws(() => parseInput('process.exit(1)'), /could not be parsed/)
+  assert.throws(() => parseInput('require("fs")'), /could not be parsed/)
+  assert.throws(() => parseInput('(function(){return {}})()'), /could not be parsed/)
+  assert.throws(() => parseInput('new Date()'), /could not be parsed/)
+})
+
+test('runBenchmark returns null when input cannot be parsed as a safe literal', async () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-runner-'))
-  const filePath = path.join(dir, 'input-fallback.ts')
+  const filePath = path.join(dir, 'bad-input.ts')
   const target: BenchTarget = {
-    name: 'takesRawString',
+    name: 'someFunction',
     file: filePath,
     line: 1,
     lang: 'js',
     options: {
       iterations: 1,
-      input: 'not valid json',
+      input: 'process.exit(1)',
     },
   }
 
   try {
-    writeFileSync(
-      filePath,
-      'export function takesRawString(value: string) { if (value !== "not valid json") throw new Error("unexpected input"); const start = Date.now(); while (Date.now() - start < 1) {} }\n',
-    )
+    writeFileSync(filePath, 'export function someFunction(x: unknown) { return x }\n')
 
     const result = await withPatchedConsoleError(() => runBenchmark(target))
 
-    assert.ok(result)
-    assert.equal(result.name, 'takesRawString')
+    assert.equal(result, null)
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
