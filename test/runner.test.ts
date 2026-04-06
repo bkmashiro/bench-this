@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { runAll, runBenchmark, parseInput, runBenchmarkWithSamples } from '../src/runner.ts'
+import { runAll, runBenchmark, parseInput, runBenchmarkWithSamples, profileBenchmark } from '../src/runner.ts'
 import type { BenchTarget } from '../src/extractor.ts'
 
 function withPatchedConsoleError<T>(fn: () => Promise<T>): Promise<T> {
@@ -425,6 +425,36 @@ test('runAll filters out null benchmark results', async () => {
     assert.equal(results.length, 1)
     assert.equal(results[0].name, 'goodFn')
   } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('profileBenchmark returns null and logs error when worker subprocess fails', async () => {
+  const errorMessages: string[] = []
+  const originalError = console.error
+  console.error = (...args: unknown[]) => { errorMessages.push(args.map(String).join(' ')) }
+
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-profile-'))
+  const filePath = path.join(dir, 'crash.ts')
+
+  // Write a file whose worker will crash at runtime (throws on execution)
+  writeFileSync(filePath, '// @bench\nexport function crashFn() { throw new Error("worker crash") }\n')
+
+  const target: BenchTarget = {
+    name: 'crashFn',
+    file: filePath,
+    line: 1,
+    lang: 'js',
+    options: {},
+  }
+
+  try {
+    const result = await profileBenchmark(target, 200)
+
+    assert.equal(result, null, 'profileBenchmark should return null on failure')
+    assert.ok(errorMessages.some(msg => msg.includes('crashFn')), 'error log should name the benchmark')
+  } finally {
+    console.error = originalError
     rmSync(dir, { recursive: true, force: true })
   }
 })
