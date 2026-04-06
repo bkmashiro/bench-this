@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
-import { runAll, runBenchmark, parseInput } from '../src/runner.ts'
+import { runAll, runBenchmark, parseInput, runBenchmarkWithSamples } from '../src/runner.ts'
 import type { BenchTarget } from '../src/extractor.ts'
 
 function withPatchedConsoleError<T>(fn: () => Promise<T>): Promise<T> {
@@ -309,6 +309,81 @@ test('runBenchmark dispatches to the Python runner when lang is py', async () =>
     assert.equal(typeof result.opsPerSec, 'number')
     assert.ok(result.opsPerSec > 0, 'opsPerSec should be positive')
     assert.equal(typeof result.avgMs, 'number')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('runBenchmarkWithSamples returns null when the function is missing', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-runner-'))
+  const filePath = path.join(dir, 'missing-samples.ts')
+  const target: BenchTarget = {
+    name: 'missingFn',
+    file: filePath,
+    line: 1,
+    lang: 'js',
+    options: { iterations: 1 },
+  }
+
+  try {
+    writeFileSync(filePath, 'export function present() { return 1 }\n')
+
+    const result = await withPatchedConsoleError(() => runBenchmarkWithSamples(target, 3))
+
+    assert.equal(result, null)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('runBenchmarkWithSamples returns aggregated result with samples array and stdDevOpsPerSec', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-runner-'))
+  const filePath = path.join(dir, 'samples.ts')
+  const target: BenchTarget = {
+    name: 'sampleFn',
+    file: filePath,
+    line: 1,
+    lang: 'js',
+    options: { iterations: 1 },
+  }
+
+  try {
+    writeFileSync(
+      filePath,
+      'export function sampleFn() { const start = Date.now(); while (Date.now() - start < 1) {} return 1 }\n',
+    )
+
+    const result = await runBenchmarkWithSamples(target, 3)
+
+    assert.ok(result)
+    assert.equal(result.name, 'sampleFn')
+    assert.ok(Array.isArray(result.samples))
+    assert.equal(result.samples?.length, 3)
+    assert.equal(typeof result.stdDevOpsPerSec, 'number')
+    assert.ok(result.opsPerSec > 0)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('runBenchmarkWithSamples returns null on the first failing sample without running remaining samples', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-runner-'))
+  const filePath = path.join(dir, 'fail-first.ts')
+  // A file where the function name the target expects is absent — every sample will fail
+  const target: BenchTarget = {
+    name: 'absentFn',
+    file: filePath,
+    line: 1,
+    lang: 'js',
+    options: { iterations: 1 },
+  }
+
+  try {
+    writeFileSync(filePath, 'export function different() { return 1 }\n')
+
+    const result = await withPatchedConsoleError(() => runBenchmarkWithSamples(target, 5))
+
+    assert.equal(result, null)
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
