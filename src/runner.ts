@@ -355,7 +355,7 @@ function runProcess(command: string, args: string[], cwd: string): Promise<strin
         return
       }
 
-      reject(new Error(stderr.trim() || `Process exited with code ${code}`))
+      reject(new Error(`Process exited with code ${code}: ${stderr.trim()}`))
     })
   })
 }

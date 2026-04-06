@@ -350,32 +350,52 @@ test('findBenchTargetsByGlob deduplicates matches across patterns', async () => 
   }
 })
 
-test('collectBenchTargets warns and skips unreadable files', async () => {
-  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-warn-'))
+test('findBenchTargets skips unreadable files and logs to console.debug with file path and error', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-find-'))
   const goodFile = path.join(dir, 'good.ts')
   const badFile = path.join(dir, 'bad.ts')
 
+  const debugMessages: string[] = []
+  const originalDebug = console.debug
+  console.debug = (...args: unknown[]) => { debugMessages.push(args.join(' ')) }
+
   try {
-    writeFileSync(goodFile, '// @bench\nexport function good() { return 1 }\n')
-    writeFileSync(badFile, '// @bench\nexport function bad() { return 2 }\n')
+    writeFileSync(goodFile, '// @bench\nexport function readable() { return 1 }\n')
+    writeFileSync(badFile, '// @bench\nexport function unreadable() { return 1 }\n')
+    // Make the file unreadable so extractBenchTargets throws
+    const { chmodSync } = await import('node:fs')
     chmodSync(badFile, 0o000)
 
-    const warnings: string[] = []
-    const originalWarn = console.warn
-    console.warn = (...args: unknown[]) => warnings.push(args.join(' '))
+    const targets = await findBenchTargets(dir)
 
-    try {
-      const targets = await findBenchTargets(dir)
+    assert.equal(targets.some(t => t.name === 'readable'), true)
+    assert.equal(targets.some(t => t.name === 'unreadable'), false)
+    assert.equal(debugMessages.some(msg => msg.includes(badFile)), true,
+      'debug log should include the file path')
+    assert.equal(debugMessages.some(msg => /permission denied|EACCES/i.test(msg)), true,
+      'debug log should include the error message')
+  } finally {
+    console.debug = originalDebug
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
 
-      assert.equal(targets.length, 1)
-      assert.equal(targets[0].name, 'good')
-      assert.equal(warnings.length, 1)
-      assert.match(warnings[0], /bench-this: skipping/)
-      assert.match(warnings[0], /bad\.ts/)
-    } finally {
-      console.warn = originalWarn
-      chmodSync(badFile, 0o644)
-    }
+test('findBenchTargets continues collecting targets after a skipped unreadable file', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-find-'))
+  const goodFile = path.join(dir, 'z-good.ts')
+  const badFile = path.join(dir, 'a-bad.ts')
+
+  try {
+    writeFileSync(goodFile, '// @bench\nexport function goodTarget() { return 1 }\n')
+    writeFileSync(badFile, '// @bench\nexport function badTarget() { return 1 }\n')
+    const { chmodSync } = await import('node:fs')
+    chmodSync(badFile, 0o000)
+
+    const targets = await findBenchTargets(dir)
+
+    // goodTarget must still be found despite the earlier unreadable file
+    assert.equal(targets.some(t => t.name === 'goodTarget'), true)
+    assert.equal(targets.some(t => t.name === 'badTarget'), false)
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
