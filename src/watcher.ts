@@ -11,6 +11,16 @@ export interface WatcherDependencies {
   log?: (...args: unknown[]) => void
 }
 
+/**
+ * Formats a `Date` as a `HH:MM:SS` string for watch-mode console output.
+ *
+ * The `'en-GB'` locale is intentional: it reliably produces `HH:MM:SS` order
+ * without relying on OS locale settings. `hour12: false` is set explicitly
+ * because some environments default to 12-hour time even for `'en-GB'`.
+ *
+ * @param date - The date to format. Defaults to the current time.
+ * @returns A zero-padded 24-hour time string, e.g. `'09:05:03'`.
+ */
 export function formatWatchTimestamp(date = new Date()): string {
   return date.toLocaleTimeString('en-GB', {
     hour12: false,
