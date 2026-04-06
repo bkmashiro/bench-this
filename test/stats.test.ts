@@ -6,6 +6,7 @@ import {
   compareSamples,
   mean,
   standardDeviation,
+  summarizeSamples,
 } from '../src/stats.ts'
 
 test('mean and standard deviation match expected sample statistics', () => {
@@ -43,4 +44,92 @@ test('compareSamples treats overlapping samples as likely noise', () => {
 
   assert.equal(result.isSignificant, false)
   assert.equal(result.pValue, 0.5)
+})
+
+// Edge cases
+
+test('mean of empty array returns 0 without throwing', () => {
+  assert.equal(mean([]), 0)
+})
+
+test('standardDeviation of empty array returns 0 without throwing', () => {
+  assert.equal(standardDeviation([]), 0)
+})
+
+test('summarizeSamples with empty array returns zeroes, no NaN', () => {
+  const result = summarizeSamples([])
+
+  assert.equal(result.mean, 0)
+  assert.equal(result.standardDeviation, 0)
+  assert.ok(!Number.isNaN(result.mean))
+  assert.ok(!Number.isNaN(result.standardDeviation))
+})
+
+test('summarizeSamples with single element has zero standard deviation', () => {
+  const result = summarizeSamples([42])
+
+  assert.equal(result.mean, 42)
+  assert.equal(result.standardDeviation, 0)
+  assert.ok(!Number.isNaN(result.standardDeviation))
+})
+
+test('calculateTValue with zero denominators avoids division by zero', () => {
+  // Both means equal, both SDs zero — identical samples
+  assert.equal(calculateTValue(100, 0, 1, 100, 0, 1), 0)
+
+  // Means differ, both SDs zero — infinite separation
+  assert.equal(calculateTValue(200, 0, 1, 100, 0, 1), Number.POSITIVE_INFINITY)
+})
+
+test('approximatePValue with Infinity or very large t-value returns smallest bucket', () => {
+  assert.equal(approximatePValue(Number.POSITIVE_INFINITY), 0.001)
+  assert.equal(approximatePValue(Number.NEGATIVE_INFINITY), 0.001)
+  assert.equal(approximatePValue(1e9), 0.001)
+})
+
+test('approximatePValue does not return NaN for any finite input', () => {
+  const inputs = [0, 0.5, 1, 1.725, 2.093, 2.326, 2.576, 2.878, 3.291, 10]
+  for (const t of inputs) {
+    assert.ok(!Number.isNaN(approximatePValue(t)), `NaN for t=${t}`)
+    assert.ok(!Number.isNaN(approximatePValue(-t)), `NaN for t=${-t}`)
+  }
+})
+
+test('compareSamples handles very large numbers without precision loss', () => {
+  const large = 1e14
+  const samples1 = [large, large + 1000, large - 1000]
+  const samples2 = [large + 5000, large + 6000, large + 4000]
+  const result = compareSamples(samples1, samples2)
+
+  assert.ok(!Number.isNaN(result.tValue))
+  assert.ok(!Number.isNaN(result.pValue))
+  assert.ok(!Number.isNaN(result.deltaPct))
+})
+
+test('compareSamples handles very small numbers without underflow to NaN', () => {
+  const samples1 = [1e-12, 2e-12, 1.5e-12]
+  const samples2 = [3e-12, 4e-12, 3.5e-12]
+  const result = compareSamples(samples1, samples2)
+
+  assert.ok(!Number.isNaN(result.tValue))
+  assert.ok(!Number.isNaN(result.pValue))
+  assert.ok(!Number.isNaN(result.deltaPct))
+})
+
+test('compareSamples with single-element samples (zero SD) does not throw or produce NaN', () => {
+  const result = compareSamples([100], [200])
+
+  assert.ok(!Number.isNaN(result.tValue))
+  assert.ok(!Number.isNaN(result.pValue))
+  assert.ok(!Number.isNaN(result.deltaPct))
+})
+
+test('compareSamples with empty samples returns zeroed result without NaN', () => {
+  const result = compareSamples([], [])
+
+  assert.equal(result.mean1, 0)
+  assert.equal(result.mean2, 0)
+  assert.ok(!Number.isNaN(result.tValue))
+  assert.ok(!Number.isNaN(result.pValue))
+  assert.ok(!Number.isNaN(result.deltaPct))
 })
