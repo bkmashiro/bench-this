@@ -1,17 +1,7 @@
 import { extname } from 'node:path'
 import { performance } from 'node:perf_hooks'
 import { pathToFileURL } from 'node:url'
-
-function parseInput(raw: string | undefined): unknown {
-  if (raw === undefined) return undefined
-  if (raw === '') return undefined
-
-  try {
-    return JSON.parse(raw)
-  } catch {
-    return raw
-  }
-}
+import { parseInput } from './runner.js'
 
 async function loadBenchmarkModule(file: string): Promise<Record<string, unknown>> {
   const fileUrl = pathToFileURL(file).href
@@ -31,7 +21,7 @@ if (!file || !funcName) {
   process.exit(1)
 }
 
-const inputValue = parseInput(rawInput)
+const inputValue = rawInput !== undefined && rawInput !== '' ? parseInput(rawInput) : undefined
 const durationMs = Number(rawDuration) || 2000
 const mod = await loadBenchmarkModule(file)
 const defaultExport = mod.default as Record<string, unknown> | undefined

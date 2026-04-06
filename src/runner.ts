@@ -8,13 +8,39 @@ import type { BenchTarget } from './extractor.js'
 import { standardDeviation } from './stats.js'
 import { runPythonBenchmark } from './runner-py.js'
 
-function parseInput(raw: string): unknown {
+export function parseInput(raw: string): unknown {
   try {
     return JSON.parse(raw)
   } catch {
-    return raw
+    // fall through to JS-literal parse
+  }
+
+  if (hasUnsafeIdentifier(raw)) {
+    throw new Error(`Input "${raw}" could not be parsed as a JSON or literal value`)
+  }
+
+  try {
+    // Only reached when the input contains no bare identifiers (outside of
+    // string content and object keys) — safe to evaluate as a JS literal
+    // (e.g. `{key: 1}`, `'hello'`).
+    return new Function('return ' + raw)()
+  } catch {
+    throw new Error(`Input "${raw}" could not be parsed as a JSON or literal value`)
   }
 }
+
+function hasUnsafeIdentifier(raw: string): boolean {
+  // Strip quoted strings so identifiers inside them don't trigger the check.
+  const stripped = raw
+    .replace(/"(?:[^"\\]|\\.)*"/g, '""')
+    .replace(/'(?:[^'\\]|\\.)*'/g, "''")
+    .replace(/`(?:[^`\\]|\\.)*`/g, '``')
+
+  // An identifier is "unsafe" if it is not: a literal keyword (true/false/null)
+  // or an unquoted object key (identifier immediately followed by `:`).
+  return /\b(?!(?:true|false|null)\b)[a-zA-Z_$][a-zA-Z0-9_$]*\b(?!\s*:)/.test(stripped)
+}
+
 
 export interface BenchResult {
   name: string
@@ -53,10 +79,7 @@ export async function runBenchmark(target: BenchTarget): Promise<BenchResult | n
       warmupIterations: 10,
     })
 
-    let inputValue: unknown
-    if (target.options.input) {
-      inputValue = parseInput(target.options.input)
-    }
+    const inputValue = target.options.input !== undefined ? parseInput(target.options.input) : undefined
 
     bench.add(target.name, () => {
       if (inputValue !== undefined) {
