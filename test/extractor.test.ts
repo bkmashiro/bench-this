@@ -122,6 +122,72 @@ test('extractor parses input option from @bench annotations', () => {
   }
 })
 
+test('extractor parses input option with double quotes from @bench annotations', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-extractor-'))
+  const filePath = path.join(dir, 'input-double.ts')
+
+  try {
+    writeFileSync(filePath, '// @bench input="hello world"\nexport function withInput(value: string) { return value }\n')
+
+    const targets = extractBenchTargets(filePath)
+
+    assert.equal(targets.length, 1)
+    assert.equal(targets[0].options.input, 'hello world')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('extractor parses input option with single quotes from @bench annotations', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-extractor-'))
+  const filePath = path.join(dir, 'input-single.ts')
+
+  try {
+    writeFileSync(filePath, "// @bench input='hello world'\nexport function withInput(value: string) { return value }\n")
+
+    const targets = extractBenchTargets(filePath)
+
+    assert.equal(targets.length, 1)
+    assert.equal(targets[0].options.input, 'hello world')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('extractor parses input with double quotes alongside other options', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-extractor-'))
+  const filePath = path.join(dir, 'input-mixed.ts')
+
+  try {
+    writeFileSync(filePath, '// @bench label="My Bench" input="test data" iterations=100\nexport function withInput(value: string) { return value }\n')
+
+    const targets = extractBenchTargets(filePath)
+
+    assert.equal(targets.length, 1)
+    assert.equal(targets[0].options.label, 'My Bench')
+    assert.equal(targets[0].options.input, 'test data')
+    assert.equal(targets[0].options.iterations, 100)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('extractor parses empty string input with double quotes', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-extractor-'))
+  const filePath = path.join(dir, 'input-empty.ts')
+
+  try {
+    writeFileSync(filePath, '// @bench input=""\nexport function withInput(value: string) { return value }\n')
+
+    const targets = extractBenchTargets(filePath)
+
+    assert.equal(targets.length, 1)
+    assert.equal(targets[0].options.input, '')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
 test('extractor finds exported arrow functions annotated with @bench', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-extractor-'))
   const filePath = path.join(dir, 'exported-arrow.ts')

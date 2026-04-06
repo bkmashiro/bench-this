@@ -54,6 +54,56 @@ test('extractor parses iterations option from Python @bench annotations', () => 
   }
 })
 
+test('extractor parses input option with double quotes from Python @bench annotations', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-py-extractor-'))
+  const filePath = path.join(dir, 'input-double.py')
+
+  try {
+    writeFileSync(filePath, '# @bench input="hello world"\ndef with_input(value):\n    return value\n')
+
+    const targets = extractBenchTargets(filePath)
+
+    assert.equal(targets.length, 1)
+    assert.equal(targets[0].options.input, 'hello world')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('extractor parses input option with single quotes from Python @bench annotations', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-py-extractor-'))
+  const filePath = path.join(dir, 'input-single.py')
+
+  try {
+    writeFileSync(filePath, "# @bench input='hello world'\ndef with_input(value):\n    return value\n")
+
+    const targets = extractBenchTargets(filePath)
+
+    assert.equal(targets.length, 1)
+    assert.equal(targets[0].options.input, 'hello world')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('extractor parses input with double quotes alongside other options in Python', () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-py-extractor-'))
+  const filePath = path.join(dir, 'input-mixed.py')
+
+  try {
+    writeFileSync(filePath, '# @bench label="My Bench" input="test data" iterations=100\ndef with_input(value):\n    return value\n')
+
+    const targets = extractBenchTargets(filePath)
+
+    assert.equal(targets.length, 1)
+    assert.equal(targets[0].options.label, 'My Bench')
+    assert.equal(targets[0].options.input, 'test data')
+    assert.equal(targets[0].options.iterations, 100)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
 test('findBenchTargets includes .py files alongside .ts files', async () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-py-find-'))
 
