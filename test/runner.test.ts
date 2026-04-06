@@ -22,6 +22,7 @@ test('runBenchmark returns null when the function is not exported by the module'
     name: 'missingFn',
     file: filePath,
     line: 1,
+    lang: 'js',
     options: {},
   }
 
@@ -43,6 +44,7 @@ test('runBenchmark executes async benchmark functions', async () => {
     name: 'fetchData',
     file: filePath,
     line: 1,
+    lang: 'js',
     options: {
       iterations: 1,
     },
@@ -73,6 +75,7 @@ test('runBenchmark resolves labeled targets back to the original exported functi
     name: 'Friendly benchmark',
     file: filePath,
     line: 1,
+    lang: 'js',
     options: {
       iterations: 1,
     },
@@ -100,6 +103,7 @@ test('runBenchmark falls back to the raw input string when eval throws', async (
     name: 'takesRawString',
     file: filePath,
     line: 1,
+    lang: 'js',
     options: {
       iterations: 1,
       input: 'not valid javascript',
@@ -128,6 +132,7 @@ test('runBenchmark can load native ESM modules without tsx', async () => {
     name: 'defaultFn',
     file: filePath,
     line: 1,
+    lang: 'js',
     options: {
       iterations: 1,
     },
@@ -155,6 +160,7 @@ test('runBenchmark returns null when module loading fails', async () => {
     name: 'brokenFn',
     file: filePath,
     line: 1,
+    lang: 'js',
     options: {},
   }
 
@@ -187,12 +193,14 @@ test('runAll filters out null benchmark results', async () => {
           name: 'goodFn',
           file: goodFile,
           line: 1,
+          lang: 'js' as const,
           options: { iterations: 1 },
         },
         {
           name: 'missingFn',
           file: badFile,
           line: 1,
+          lang: 'js' as const,
           options: {},
         },
       ]),
