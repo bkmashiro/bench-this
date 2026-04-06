@@ -3,3 +3,5 @@ coverage/
 *.js.map
 .bench-baseline.json
 *.db
+__pycache__/
+*.pyc
