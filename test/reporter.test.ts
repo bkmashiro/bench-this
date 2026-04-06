@@ -41,7 +41,7 @@ function captureLogs(fn: () => void): string {
   return stripAnsi(lines.join('\n'))
 }
 
-test('reporter shows "regression" when current is more than 20% slower than baseline', () => {
+test('reporter shows "regression" when pctChange is below the negative threshold', () => {
   const output = captureReport([
     {
       result: { name: 'addNumbers', opsPerSec: 70, avgMs: 1.2, p99Ms: 1.6 },
@@ -54,7 +54,7 @@ test('reporter shows "regression" when current is more than 20% slower than base
   assert.match(output, /regression/)
 })
 
-test('reporter shows "improvement" when current is more than 20% faster than baseline', () => {
+test('reporter shows "improvement" when pctChange is above the positive threshold', () => {
   const output = captureReport([
     {
       result: { name: 'addNumbers', opsPerSec: 130, avgMs: 0.7, p99Ms: 1.1 },
@@ -122,6 +122,53 @@ test('compare marks regressions based on the provided threshold and preserves ne
   assert.equal(comparisons[0].pctChange, -21)
   assert.equal(comparisons[1].baseline, undefined)
   assert.equal(comparisons[1].isRegression, false)
+})
+
+test('reporter classifies as regression only when pctChange exceeds the custom threshold', () => {
+  const comparison: CompareResult = {
+    result: { name: 'fn', opsPerSec: 88, avgMs: 1.1, p99Ms: 1.5 },
+    baseline: { opsPerSec: 100, avgMs: 1, savedAt: '2026-04-02' },
+    pctChange: -12,
+    isRegression: false,
+  }
+
+  // With default threshold (10%), -12% is a regression
+  const defaultOutput = captureReport([comparison])
+  assert.match(defaultOutput, /regression/)
+
+  // With a custom threshold of 15%, -12% is stable
+  const customOutput = captureReport([comparison], 15)
+  assert.match(customOutput, /stable/)
+})
+
+test('reporter classifies as improvement only when pctChange exceeds the custom threshold', () => {
+  const comparison: CompareResult = {
+    result: { name: 'fn', opsPerSec: 112, avgMs: 0.9, p99Ms: 1.1 },
+    baseline: { opsPerSec: 100, avgMs: 1, savedAt: '2026-04-02' },
+    pctChange: 12,
+    isRegression: false,
+  }
+
+  // With default threshold (10%), +12% is an improvement
+  const defaultOutput = captureReport([comparison])
+  assert.match(defaultOutput, /improvement/)
+
+  // With a custom threshold of 15%, +12% is stable
+  const customOutput = captureReport([comparison], 15)
+  assert.match(customOutput, /stable/)
+})
+
+test('reporter classifies as stable when pctChange is exactly at the threshold boundary', () => {
+  const comparisonAtThreshold: CompareResult = {
+    result: { name: 'fn', opsPerSec: 80, avgMs: 1.2, p99Ms: 1.5 },
+    baseline: { opsPerSec: 100, avgMs: 1, savedAt: '2026-04-02' },
+    pctChange: -20,
+    isRegression: false,
+  }
+
+  // At exactly -20% with threshold=20, should be stable (not strictly less than)
+  const output = captureReport([comparisonAtThreshold], 20)
+  assert.match(output, /stable/)
 })
 
 test('reporter emits JSON when requested', () => {
