@@ -58,6 +58,7 @@ export function summarizeSamples(samples: number[]): SampleSummary {
  *   returns `Infinity` / `-Infinity` when means differ but the denominator is zero.
  */
 export function calculateTValue(mean1: number, sd1: number, n1: number, mean2: number, sd2: number, n2: number): number {
+  if (n1 === 0 || n2 === 0) return 0
   const denominator = Math.sqrt((sd1 ** 2) / n1 + (sd2 ** 2) / n2)
   if (denominator === 0) {
     return mean1 === mean2 ? 0 : Number.POSITIVE_INFINITY
