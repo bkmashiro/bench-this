@@ -171,6 +171,17 @@ test('reporter classifies as stable when pctChange is exactly at the threshold b
   assert.match(output, /stable/)
 })
 
+test('compare does not report a regression when baseline opsPerSec is zero', () => {
+  const comparisons = compare(
+    [{ name: 'zeroBaseFn', opsPerSec: 500, avgMs: 0.5, p99Ms: 0.8 }],
+    { zeroBaseFn: { opsPerSec: 0, avgMs: 0, savedAt: '2026-04-06' } },
+    20,
+  )
+
+  assert.equal(comparisons[0].pctChange, undefined)
+  assert.equal(comparisons[0].isRegression, false)
+})
+
 test('reporter emits JSON when requested', () => {
   const output = captureLogs(() => {
     printReport(
