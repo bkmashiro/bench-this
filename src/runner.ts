@@ -8,6 +8,14 @@ import type { BenchTarget } from './extractor.js'
 import { standardDeviation } from './stats.js'
 import { runPythonBenchmark } from './runner-py.js'
 
+function parseInput(raw: string): unknown {
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return raw
+  }
+}
+
 export interface BenchResult {
   name: string
   opsPerSec: number
@@ -47,11 +55,7 @@ export async function runBenchmark(target: BenchTarget): Promise<BenchResult | n
 
     let inputValue: unknown
     if (target.options.input) {
-      try {
-        inputValue = eval(target.options.input)
-      } catch {
-        inputValue = target.options.input
-      }
+      inputValue = parseInput(target.options.input)
     }
 
     bench.add(target.name, () => {

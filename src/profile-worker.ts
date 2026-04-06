@@ -4,9 +4,10 @@ import { pathToFileURL } from 'node:url'
 
 function parseInput(raw: string | undefined): unknown {
   if (raw === undefined) return undefined
+  if (raw === '') return undefined
 
   try {
-    return eval(raw)
+    return JSON.parse(raw)
   } catch {
     return raw
   }
