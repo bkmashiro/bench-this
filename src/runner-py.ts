@@ -78,7 +78,12 @@ export async function runPythonBenchmark(target: BenchTarget): Promise<BenchResu
       const lastLine = result.stdout.trim().split('\n').filter(Boolean).at(-1)
       if (!lastLine) throw new Error('No output from Python harness')
 
-      const parsed = JSON.parse(lastLine) as { opsPerSec: number; avgMs: number; p99Ms: number }
+      let parsed: { opsPerSec: number; avgMs: number; p99Ms: number }
+      try {
+        parsed = JSON.parse(lastLine) as { opsPerSec: number; avgMs: number; p99Ms: number }
+      } catch {
+        throw new Error('Failed to parse Python benchmark output: ' + lastLine)
+      }
 
       return {
         name: target.name,
