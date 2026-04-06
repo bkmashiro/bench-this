@@ -96,7 +96,7 @@ test('runBenchmark resolves labeled targets back to the original exported functi
   }
 })
 
-test('runBenchmark falls back to the raw input string when eval throws', async () => {
+test('runBenchmark falls back to the raw input string when JSON.parse fails', async () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-runner-'))
   const filePath = path.join(dir, 'input-fallback.ts')
   const target: BenchTarget = {
@@ -106,20 +106,106 @@ test('runBenchmark falls back to the raw input string when eval throws', async (
     lang: 'js',
     options: {
       iterations: 1,
-      input: 'not valid javascript',
+      input: 'not valid json',
     },
   }
 
   try {
     writeFileSync(
       filePath,
-      'export function takesRawString(value: string) { if (value !== "not valid javascript") throw new Error("unexpected input"); const start = Date.now(); while (Date.now() - start < 1) {} }\n',
+      'export function takesRawString(value: string) { if (value !== "not valid json") throw new Error("unexpected input"); const start = Date.now(); while (Date.now() - start < 1) {} }\n',
     )
 
     const result = await withPatchedConsoleError(() => runBenchmark(target))
 
     assert.ok(result)
     assert.equal(result.name, 'takesRawString')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('runBenchmark parses JSON array input and passes it to the function', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-runner-'))
+  const filePath = path.join(dir, 'input-array.ts')
+  const target: BenchTarget = {
+    name: 'takesArray',
+    file: filePath,
+    line: 1,
+    options: {
+      iterations: 1,
+      input: '[1, 2, 3]',
+    },
+  }
+
+  try {
+    writeFileSync(
+      filePath,
+      'export function takesArray(value: unknown) { if (!Array.isArray(value) || value[0] !== 1) throw new Error("unexpected input"); const start = Date.now(); while (Date.now() - start < 1) {} }\n',
+    )
+
+    const result = await runBenchmark(target)
+
+    assert.ok(result)
+    assert.equal(result.name, 'takesArray')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('runBenchmark parses JSON object input and passes it to the function', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-runner-'))
+  const filePath = path.join(dir, 'input-object.ts')
+  const target: BenchTarget = {
+    name: 'takesObject',
+    file: filePath,
+    line: 1,
+    options: {
+      iterations: 1,
+      input: '{"key":"value"}',
+    },
+  }
+
+  try {
+    writeFileSync(
+      filePath,
+      'export function takesObject(value: unknown) { if (typeof value !== "object" || value === null || (value as Record<string, unknown>).key !== "value") throw new Error("unexpected input"); const start = Date.now(); while (Date.now() - start < 1) {} }\n',
+    )
+
+    const result = await runBenchmark(target)
+
+    assert.ok(result)
+    assert.equal(result.name, 'takesObject')
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('runBenchmark does not execute code expressions in input (treats them as raw strings)', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-runner-'))
+  const filePath = path.join(dir, 'input-expr.ts')
+  // An eval-based implementation would execute this and return 2.
+  // JSON.parse will fail, so the raw string must be passed as-is.
+  const target: BenchTarget = {
+    name: 'takesExpr',
+    file: filePath,
+    line: 1,
+    options: {
+      iterations: 1,
+      input: '1 + 1',
+    },
+  }
+
+  try {
+    writeFileSync(
+      filePath,
+      'export function takesExpr(value: unknown) { if (value !== "1 + 1") throw new Error(`expected raw string, got: ${JSON.stringify(value)}`); const start = Date.now(); while (Date.now() - start < 1) {} }\n',
+    )
+
+    const result = await runBenchmark(target)
+
+    assert.ok(result)
+    assert.equal(result.name, 'takesExpr')
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
