@@ -32,7 +32,7 @@ async function runBenchmarksWithBaseline(searchPath: string, opts: { threshold: 
   const threshold = parseFloat(opts.threshold)
   const comparisons = compare(results, baseline, threshold)
 
-  printReport(comparisons, opts.json)
+  printReport(comparisons, opts.json, threshold)
 
   if (opts.ci && comparisons.some(c => c.isRegression)) {
     process.exit(1)

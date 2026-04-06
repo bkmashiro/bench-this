@@ -7,7 +7,7 @@ function stripAnsi(value: string): string {
   return value.replace(/\u001B\[[0-9;]*m/g, '')
 }
 
-function captureReport(comparisons: CompareResult[]): string {
+function captureReport(comparisons: CompareResult[], threshold = 10): string {
   const lines: string[] = []
   const originalLog = console.log
 
@@ -16,7 +16,7 @@ function captureReport(comparisons: CompareResult[]): string {
   }
 
   try {
-    printReport(comparisons)
+    printReport(comparisons, false, threshold)
   } finally {
     console.log = originalLog
   }
@@ -41,7 +41,7 @@ function captureLogs(fn: () => void): string {
   return stripAnsi(lines.join('\n'))
 }
 
-test('reporter shows "regression" when current is more than 20% slower than baseline', () => {
+test('reporter shows "regression" when pctChange exceeds the threshold negatively', () => {
   const output = captureReport([
     {
       result: { name: 'addNumbers', opsPerSec: 70, avgMs: 1.2, p99Ms: 1.6 },
@@ -54,7 +54,7 @@ test('reporter shows "regression" when current is more than 20% slower than base
   assert.match(output, /regression/)
 })
 
-test('reporter shows "improvement" when current is more than 20% faster than baseline', () => {
+test('reporter shows "improvement" when pctChange exceeds the threshold positively', () => {
   const output = captureReport([
     {
       result: { name: 'addNumbers', opsPerSec: 130, avgMs: 0.7, p99Ms: 1.1 },
@@ -171,6 +171,70 @@ test('reporter prints pluralized regression summary for multiple failures', () =
   ])
 
   assert.match(output, /2 regressions found/)
+})
+
+test('reporter respects a custom threshold: 5% change is a regression at threshold=5', () => {
+  const output = captureReport(
+    [
+      {
+        result: { name: 'borderFn', opsPerSec: 94, avgMs: 1.1, p99Ms: 1.4 },
+        baseline: { opsPerSec: 100, avgMs: 1, savedAt: '2026-04-02' },
+        pctChange: -6,
+        isRegression: true,
+      },
+    ],
+    5,
+  )
+
+  assert.match(output, /regression/)
+})
+
+test('reporter respects a custom threshold: 5% change is stable at threshold=10', () => {
+  const output = captureReport(
+    [
+      {
+        result: { name: 'borderFn', opsPerSec: 94, avgMs: 1.1, p99Ms: 1.4 },
+        baseline: { opsPerSec: 100, avgMs: 1, savedAt: '2026-04-02' },
+        pctChange: -6,
+        isRegression: false,
+      },
+    ],
+    10,
+  )
+
+  assert.match(output, /stable/)
+})
+
+test('reporter treats pctChange exactly equal to threshold as stable (not regression)', () => {
+  const output = captureReport(
+    [
+      {
+        result: { name: 'exactFn', opsPerSec: 90, avgMs: 1.1, p99Ms: 1.4 },
+        baseline: { opsPerSec: 100, avgMs: 1, savedAt: '2026-04-02' },
+        pctChange: -10,
+        isRegression: false,
+      },
+    ],
+    10,
+  )
+
+  assert.match(output, /stable/)
+})
+
+test('reporter treats pctChange exactly equal to threshold as stable (not improvement)', () => {
+  const output = captureReport(
+    [
+      {
+        result: { name: 'exactFn', opsPerSec: 110, avgMs: 0.9, p99Ms: 1.1 },
+        baseline: { opsPerSec: 100, avgMs: 1, savedAt: '2026-04-02' },
+        pctChange: 10,
+        isRegression: false,
+      },
+    ],
+    10,
+  )
+
+  assert.match(output, /stable/)
 })
 
 test('printList shows iteration and input metadata when present', () => {

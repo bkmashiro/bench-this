@@ -60,8 +60,9 @@ function getStatus(pctChange: number, threshold: number): 'regression' | 'improv
  *
  * @param comparisons - The comparison entries produced by {@link compare}.
  * @param json - When `true`, emits raw JSON instead of the human-readable table.
+ * @param threshold - The percentage change threshold for classifying regressions/improvements.
  */
-export function printReport(comparisons: CompareResult[], json = false): void {
+export function printReport(comparisons: CompareResult[], json = false, threshold = 10): void {
   if (json) {
     console.log(JSON.stringify(comparisons, null, 2))
     return
@@ -86,7 +87,7 @@ export function printReport(comparisons: CompareResult[], json = false): void {
     if (baseline !== undefined && pctChange !== undefined) {
       const sign = pctChange >= 0 ? '+' : ''
       const pctStr = `${sign}${pctChange.toFixed(1)}%`
-      const status = getStatus(pctChange, 20)
+      const status = getStatus(pctChange, threshold)
 
       if (status === 'regression') {
         console.log(
