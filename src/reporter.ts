@@ -47,6 +47,19 @@ function fmtMs(n: number): string {
   return n.toFixed(3) + 'ms'
 }
 
+/**
+ * Classifies a percentage change relative to a symmetric threshold.
+ *
+ * Both comparisons are strict (`<` / `>`), so a change equal to the threshold
+ * is considered `'stable'`. The threshold is applied symmetrically: a negative
+ * `pctChange` below `-threshold` is a regression; a positive `pctChange` above
+ * `+threshold` is an improvement.
+ *
+ * @param pctChange - Percentage change in ops/s vs. baseline (negative = slower).
+ * @param threshold - Minimum absolute percentage change required to leave
+ *   `'stable'` (e.g. `5` means ±5%).
+ * @returns `'regression'` | `'improvement'` | `'stable'`
+ */
 function getStatus(pctChange: number, threshold: number): 'regression' | 'improvement' | 'stable' {
   if (pctChange < -threshold) return 'regression'
   if (pctChange > threshold) return 'improvement'

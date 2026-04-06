@@ -317,6 +317,21 @@ function getProfileWorkerArgs(target: BenchTarget, durationMs: number): string[]
   return ['--prof', fileURLToPath(tsxCliPath), fileURLToPath(tsWorkerPath), target.file, funcName, input, String(durationMs)]
 }
 
+/**
+ * Spawns a child process and resolves with its stdout on success.
+ *
+ * Stderr is buffered throughout the run but is only used on failure — it is
+ * discarded when the process exits with code 0. This means callers receive
+ * clean stdout without interleaved diagnostic output.
+ *
+ * @param command - The executable to run (e.g. `'node'`).
+ * @param args    - Arguments passed to the executable.
+ * @param cwd     - Working directory for the child process.
+ * @returns The full stdout string collected from the process.
+ * @throws {Error} If the process emits a spawn error or exits with a non-zero
+ *   code. The error message is the trimmed stderr content, or a generic
+ *   "Process exited with code N" fallback when stderr is empty.
+ */
 function runProcess(command: string, args: string[], cwd: string): Promise<string> {
   return new Promise((resolvePromise, reject) => {
     const child = spawn(command, args, {

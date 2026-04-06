@@ -53,6 +53,24 @@ export function getPyFuncName(target: BenchTarget): string {
   return target.name
 }
 
+/**
+ * Runs a single Python benchmark target and returns its timing results.
+ *
+ * **Temp-file lifecycle**: a self-contained harness script is written to a
+ * randomly-named file under `os.tmpdir()` before `python3` is invoked. The
+ * file is deleted in a `finally` block regardless of whether the run succeeds
+ * or fails, so it is never left behind on disk.
+ *
+ * **JSON protocol**: the harness script prints a single JSON object to stdout
+ * on its last line: `{ opsPerSec, avgMs, p99Ms }`. Only the last non-empty
+ * line is parsed so any incidental print statements in the benchmarked module
+ * do not interfere.
+ *
+ * @param target - The benchmark target describing the file, function name, and
+ *   options (iterations, input value) to use.
+ * @returns A {@link BenchResult} on success, or `null` if the process fails or
+ *   the output cannot be parsed (the error is logged to stderr).
+ */
 export async function runPythonBenchmark(target: BenchTarget): Promise<BenchResult | null> {
   try {
     const funcName = getPyFuncName(target)
