@@ -5,6 +5,7 @@ import { tmpdir } from 'os'
 import { randomBytes } from 'crypto'
 import type { BenchTarget } from './extractor.js'
 import type { BenchResult } from './runner.js'
+import { PY_BENCH_PATTERN } from './patterns.js'
 
 export function buildHarnessScript(target: BenchTarget, funcName: string): string {
   const modulePath = target.file.replace(/\\/g, '/')
@@ -35,8 +36,7 @@ print(json.dumps({"opsPerSec": ops_per_sec, "avgMs": avg_ms, "p99Ms": avg_ms}))
 
 export function getPyFuncName(target: BenchTarget): string {
   const content = readFileSync(target.file, 'utf-8')
-  const PY_BENCH_PATTERN = /#\s*@bench([^\n]*)\n\s*(?:async\s+)?def\s+(\w+)/gm
-
+  PY_BENCH_PATTERN.lastIndex = 0
   let match: RegExpExecArray | null
   while ((match = PY_BENCH_PATTERN.exec(content)) !== null) {
     const optStr = match[1] || ''

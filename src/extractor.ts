@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs'
 import { glob } from 'glob'
 import * as path from 'path'
+import { BENCH_PATTERN, PY_BENCH_PATTERN } from './patterns.js'
 
 /**
  * Represents a single benchmark target discovered in a source file.
@@ -25,13 +26,6 @@ export interface BenchTarget {
   }
 }
 
-// Matches `// @bench(...)` annotations on the line immediately before a JS/TS function declaration.
-// Group 1: raw option string (e.g. ` label="foo" iterations=100`)
-// Group 3: function name for `function foo` / `async function foo` style declarations
-// Group 4: variable name for `const foo = (` / `const foo = async (` style arrow functions
-const BENCH_PATTERN = /\/\/\s*@bench([^\n]*)\n\s*((?:export\s+)?(?:async\s+)?function\s+(\w+)|(?:export\s+)?(?:const|let)\s+(\w+)\s*=\s*(?:async\s+)?\()/gm
-
-const PY_BENCH_PATTERN = /#\s*@bench([^\n]*)\n\s*(?:async\s+)?def\s+(\w+)/gm
 
 function parseOptions(optStr: string): BenchTarget['options'] {
   const opts: BenchTarget['options'] = {}

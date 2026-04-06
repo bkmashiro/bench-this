@@ -7,6 +7,7 @@ import { tmpdir } from 'os'
 import type { BenchTarget } from './extractor.js'
 import { standardDeviation } from './stats.js'
 import { runPythonBenchmark } from './runner-py.js'
+import { BENCH_PATTERN } from './patterns.js'
 
 export function parseInput(raw: string): unknown {
   try {
@@ -161,8 +162,7 @@ function getFuncName(target: BenchTarget): string {
   // Re-extract from file to get the real function name
   const content = readFileSync(target.file, 'utf-8')
 
-  const BENCH_PATTERN = /\/\/\s*@bench([^\n]*)\n\s*((?:export\s+)?(?:async\s+)?function\s+(\w+)|(?:export\s+)?(?:const|let)\s+(\w+)\s*=\s*(?:async\s+)?\()/gm
-
+  BENCH_PATTERN.lastIndex = 0
   let match: RegExpExecArray | null
   while ((match = BENCH_PATTERN.exec(content)) !== null) {
     const optStr = match[1] || ''
