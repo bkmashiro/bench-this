@@ -191,7 +191,7 @@ test('printReport uses threshold param: -15% is regression at threshold=10', () 
   assert.match(output, /regression/)
 })
 
-test('printReport uses threshold param: -15% is stable at threshold=20 (default)', () => {
+test('printReport uses threshold param: -15% is stable at threshold=20', () => {
   const output = captureReport([
     {
       result: { name: 'fn', opsPerSec: 85, avgMs: 1.15, p99Ms: 1.4 },
@@ -199,7 +199,7 @@ test('printReport uses threshold param: -15% is stable at threshold=20 (default)
       pctChange: -15,
       isRegression: false,
     },
-  ])
+  ], 20)
 
   assert.match(output, /stable/)
 })
@@ -220,7 +220,7 @@ test('printReport uses threshold param: +15% is improvement at threshold=10', ()
   assert.match(output, /improvement/)
 })
 
-test('printReport uses threshold param: +15% is stable at threshold=20 (default)', () => {
+test('printReport uses threshold param: +15% is stable at threshold=20', () => {
   const output = captureReport([
     {
       result: { name: 'fn', opsPerSec: 115, avgMs: 0.87, p99Ms: 1.1 },
@@ -228,7 +228,7 @@ test('printReport uses threshold param: +15% is stable at threshold=20 (default)
       pctChange: 15,
       isRegression: false,
     },
-  ])
+  ], 20)
 
   assert.match(output, /stable/)
 })
