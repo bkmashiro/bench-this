@@ -11,6 +11,16 @@ export interface CompareResult {
   isRegression: boolean
 }
 
+/**
+ * Compares benchmark results against a saved baseline and flags regressions.
+ *
+ * @param results - The current benchmark results to evaluate.
+ * @param baseline - The saved baseline to compare against, keyed by benchmark name.
+ * @param threshold - The percentage drop in ops/sec that constitutes a regression.
+ *   For example, `10` means a 10% slowdown triggers a regression flag.
+ * @returns An array of comparison entries, each pairing a result with its baseline
+ *   data, percentage change, and regression status.
+ */
 export function compare(results: BenchResult[], baseline: Baseline, threshold: number): CompareResult[] {
   return results.map(result => {
     const base = baseline[result.name]
@@ -41,6 +51,16 @@ function getStatus(pctChange: number, threshold: number): 'regression' | 'improv
   return 'stable'
 }
 
+/**
+ * Prints a formatted benchmark comparison report to stdout.
+ *
+ * Each benchmark entry is printed with its current throughput in ops/sec and
+ * average latency in milliseconds. When a baseline is available, the percentage
+ * change is shown and regressions are highlighted in red.
+ *
+ * @param comparisons - The comparison entries produced by {@link compare}.
+ * @param json - When `true`, emits raw JSON instead of the human-readable table.
+ */
 export function printReport(comparisons: CompareResult[], json = false): void {
   if (json) {
     console.log(JSON.stringify(comparisons, null, 2))
@@ -104,6 +124,14 @@ export function printReport(comparisons: CompareResult[], json = false): void {
   console.log()
 }
 
+/**
+ * Prints a formatted list of discovered benchmark targets to stdout.
+ *
+ * Each entry shows the function name, source file, and line number. Optional
+ * per-benchmark settings such as `iterations` and `input` are shown when present.
+ *
+ * @param targets - The benchmark targets discovered by the extractor.
+ */
 export function printList(targets: import('./extractor.js').BenchTarget[]): void {
   console.log()
   console.log(chalk.bold('bench-this — annotated functions'))
@@ -135,6 +163,15 @@ export interface StatsReportEntry {
   significance?: SignificanceResult
 }
 
+/**
+ * Prints a CPU profile report for one or more benchmark functions to stdout.
+ *
+ * For each result, the top-3 hotspots are listed with their percentage of total
+ * CPU time, file location, and a marker when the frame belongs to user code.
+ * An optional suggestion is shown when the profiler identifies a likely cause.
+ *
+ * @param results - The profiling results collected by the runner.
+ */
 export function printProfileReport(results: ProfileResult[]): void {
   for (const result of results) {
     console.log(`Profiling ${result.name}...`)
@@ -161,6 +198,17 @@ export function printProfileReport(results: ProfileResult[]): void {
   }
 }
 
+/**
+ * Prints a statistical significance report comparing current results to a baseline.
+ *
+ * For each entry, throughput in ops/sec is shown for both the current run and the
+ * saved baseline. When significance data is available, the percentage delta and
+ * p-value are reported, with a clear label indicating whether the difference is
+ * statistically significant (p &lt; 0.05) or likely measurement noise.
+ *
+ * @param entries - The report entries, each combining a benchmark result with its
+ *   optional baseline and significance test outcome.
+ */
 export function printStatsReport(entries: StatsReportEntry[]): void {
   for (const entry of entries) {
     const currentOps = fmtOps(entry.current.opsPerSec)
