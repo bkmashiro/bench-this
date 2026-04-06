@@ -21,6 +21,7 @@ test('runBenchmark returns null when the function is not exported by the module'
   const target: BenchTarget = {
     name: 'missingFn',
     file: filePath,
+    lang: 'js',
     line: 1,
     lang: 'js',
     options: {},
@@ -43,6 +44,7 @@ test('runBenchmark executes async benchmark functions', async () => {
   const target: BenchTarget = {
     name: 'fetchData',
     file: filePath,
+    lang: 'js',
     line: 1,
     lang: 'js',
     options: {
@@ -74,6 +76,7 @@ test('runBenchmark resolves labeled targets back to the original exported functi
   const target: BenchTarget = {
     name: 'Friendly benchmark',
     file: filePath,
+    lang: 'js',
     line: 1,
     lang: 'js',
     options: {
@@ -148,6 +151,7 @@ test('runBenchmark parses JSON array input and passes it to the function', async
   const target: BenchTarget = {
     name: 'takesArray',
     file: filePath,
+    lang: 'js',
     line: 1,
     options: {
       iterations: 1,
@@ -234,6 +238,7 @@ test('runBenchmark can load native ESM modules without tsx', async () => {
   const target: BenchTarget = {
     name: 'defaultFn',
     file: filePath,
+    lang: 'js',
     line: 1,
     lang: 'js',
     options: {
@@ -262,6 +267,7 @@ test('runBenchmark returns null when module loading fails', async () => {
   const target: BenchTarget = {
     name: 'brokenFn',
     file: filePath,
+    lang: 'js',
     line: 1,
     lang: 'js',
     options: {},
@@ -273,6 +279,36 @@ test('runBenchmark returns null when module loading fails', async () => {
     const result = await withPatchedConsoleError(() => runBenchmark(target))
 
     assert.equal(result, null)
+  } finally {
+    rmSync(dir, { recursive: true, force: true })
+  }
+})
+
+test('runBenchmark dispatches to the Python runner when lang is py', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'bench-this-runner-'))
+  const filePath = path.join(dir, 'pybench.py')
+
+  try {
+    writeFileSync(
+      filePath,
+      '# @bench\ndef pyFn():\n    return 42\n',
+    )
+
+    const target: BenchTarget = {
+      name: 'pyFn',
+      file: filePath,
+      lang: 'py',
+      line: 1,
+      options: { iterations: 10 },
+    }
+
+    const result = await runBenchmark(target)
+
+    assert.ok(result, 'expected a result from the Python runner')
+    assert.equal(result.name, 'pyFn')
+    assert.equal(typeof result.opsPerSec, 'number')
+    assert.ok(result.opsPerSec > 0, 'opsPerSec should be positive')
+    assert.equal(typeof result.avgMs, 'number')
   } finally {
     rmSync(dir, { recursive: true, force: true })
   }
@@ -295,6 +331,7 @@ test('runAll filters out null benchmark results', async () => {
         {
           name: 'goodFn',
           file: goodFile,
+          lang: 'js' as const,
           line: 1,
           lang: 'js' as const,
           options: { iterations: 1 },
@@ -302,6 +339,7 @@ test('runAll filters out null benchmark results', async () => {
         {
           name: 'missingFn',
           file: badFile,
+          lang: 'js' as const,
           line: 1,
           lang: 'js' as const,
           options: {},
