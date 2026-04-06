@@ -27,12 +27,14 @@ export function compare(results: BenchResult[], baseline: Baseline, threshold: n
     if (!base) {
       return { result, isRegression: false }
     }
-    const pctChange = ((result.opsPerSec - base.opsPerSec) / base.opsPerSec) * 100
+    const pctChange = base.opsPerSec === 0
+      ? undefined
+      : ((result.opsPerSec - base.opsPerSec) / base.opsPerSec) * 100
     return {
       result,
       baseline: base,
       pctChange,
-      isRegression: pctChange < -threshold,
+      isRegression: pctChange !== undefined && pctChange < -threshold,
     }
   })
 }
