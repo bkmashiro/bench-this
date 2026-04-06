@@ -81,6 +81,18 @@ test('calculateTValue with zero denominators avoids division by zero', () => {
   assert.equal(calculateTValue(200, 0, 1, 100, 0, 1), Number.POSITIVE_INFINITY)
 })
 
+test('calculateTValue returns Infinity when both SDs are 0 but means differ', () => {
+  const tValue = calculateTValue(100, 0, 5, 200, 0, 5)
+
+  assert.equal(tValue, Infinity)
+})
+
+test('calculateTValue returns 0 when both SDs are 0 and means are equal', () => {
+  const tValue = calculateTValue(100, 0, 5, 100, 0, 5)
+
+  assert.equal(tValue, 0)
+})
+
 test('approximatePValue with Infinity or very large t-value returns smallest bucket', () => {
   assert.equal(approximatePValue(Number.POSITIVE_INFINITY), 0.001)
   assert.equal(approximatePValue(Number.NEGATIVE_INFINITY), 0.001)
@@ -93,6 +105,18 @@ test('approximatePValue does not return NaN for any finite input', () => {
     assert.ok(!Number.isNaN(approximatePValue(t)), `NaN for t=${t}`)
     assert.ok(!Number.isNaN(approximatePValue(-t)), `NaN for t=${-t}`)
   }
+})
+
+test('approximatePValue returns correct bucket for negative t-values', () => {
+  assert.equal(approximatePValue(-2.2), 0.05)
+  assert.equal(approximatePValue(-3.5), 0.001)
+  assert.equal(approximatePValue(-0.5), 0.5)
+})
+
+test('approximatePValue returns correct bucket at exact table boundaries', () => {
+  assert.equal(approximatePValue(2.878), 0.004)
+  assert.equal(approximatePValue(2.576), 0.01)
+  assert.equal(approximatePValue(3.291), 0.001)
 })
 
 test('compareSamples handles very large numbers without precision loss', () => {
@@ -116,20 +140,32 @@ test('compareSamples handles very small numbers without underflow to NaN', () =>
   assert.ok(!Number.isNaN(result.deltaPct))
 })
 
-test('compareSamples with single-element samples (zero SD) does not throw or produce NaN', () => {
+test('compareSamples with n=1 arrays where standard deviation is 0', () => {
   const result = compareSamples([100], [200])
 
-  assert.ok(!Number.isNaN(result.tValue))
-  assert.ok(!Number.isNaN(result.pValue))
-  assert.ok(!Number.isNaN(result.deltaPct))
+  assert.equal(result.standardDeviation1, 0)
+  assert.equal(result.standardDeviation2, 0)
+  assert.equal(result.tValue, Infinity)
+  assert.equal(result.pValue, 0.001)
+  assert.equal(result.isSignificant, true)
 })
 
-test('compareSamples with empty samples returns zeroed result without NaN', () => {
+test('compareSamples with n=1 identical arrays returns tValue of 0', () => {
+  const result = compareSamples([100], [100])
+
+  assert.equal(result.tValue, 0)
+  assert.equal(result.pValue, 0.5)
+  assert.equal(result.isSignificant, false)
+})
+
+test('compareSamples with empty arrays returns zeroed means and NaN tValue', () => {
   const result = compareSamples([], [])
 
   assert.equal(result.mean1, 0)
   assert.equal(result.mean2, 0)
-  assert.ok(!Number.isNaN(result.tValue))
-  assert.ok(!Number.isNaN(result.pValue))
-  assert.ok(!Number.isNaN(result.deltaPct))
+  assert.equal(result.standardDeviation1, 0)
+  assert.equal(result.standardDeviation2, 0)
+  // n=0 causes 0/0 in the t-value denominator, producing NaN
+  assert.ok(Number.isNaN(result.tValue))
+  assert.equal(result.deltaPct, 0)
 })

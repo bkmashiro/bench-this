@@ -15,7 +15,7 @@ function buildHarnessScript(target: BenchTarget, funcName: string): string {
   return `
 import sys
 import json
-import time
+import timeit
 import importlib.util
 
 spec = importlib.util.spec_from_file_location("_bench_module", ${JSON.stringify(modulePath)})
@@ -24,20 +24,12 @@ spec.loader.exec_module(mod)
 ${funcName} = getattr(mod, ${JSON.stringify(funcName)})
 
 iterations = ${iterations}
-latencies = []
-for _ in range(iterations):
-    t0 = time.perf_counter()
-    ${callExpr}
-    latencies.append((time.perf_counter() - t0) * 1000)
+elapsed = timeit.timeit(lambda: ${callExpr}, number=iterations)
 
-latencies.sort()
-total_ms = sum(latencies)
-ops_per_sec = iterations / (total_ms / 1000) if total_ms > 0 else 0
-avg_ms = total_ms / iterations
-p99_index = max(0, int(iterations * 0.99) - 1)
-p99_ms = latencies[p99_index]
+ops_per_sec = iterations / elapsed if elapsed > 0 else 0
+avg_ms = (elapsed / iterations) * 1000
 
-print(json.dumps({"opsPerSec": ops_per_sec, "avgMs": avg_ms, "p99Ms": p99_ms}))
+print(json.dumps({"opsPerSec": ops_per_sec, "avgMs": avg_ms, "p99Ms": avg_ms}))
 `.trim()
 }
 
